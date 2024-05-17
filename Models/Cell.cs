@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using GalaxyWars.Models;
 
 namespace GalaxyWars
 {

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using GalaxyWars.Models;
 
 namespace GalaxyWars.Setup
 {
@@ -8,32 +10,31 @@ namespace GalaxyWars.Setup
         private readonly Cell[,] _gameBoard;
         private readonly List<Player> _players;
         private readonly Game _game;
-        private readonly int _numberOfPlayers;
+        private readonly int _playerCount;
 
-        public PlayerSetup(Cell[,] gameBoard, List<Player> players, Game game, int numberOfPlayers)
+        public PlayerSetup(Cell[,] gameBoard, List<Player> players, Game game, int playerCount)
         {
             _gameBoard = gameBoard;
             _players = players;
             _game = game;
-            _numberOfPlayers = numberOfPlayers;
+            _playerCount = playerCount;
         }
 
         public void SetupPlayers()
         {
             var random = new Random();
-            for (int i = 0; i < _numberOfPlayers; i++)
+            for (int i = 0; i < _playerCount; i++)
             {
                 int x, y;
                 do
                 {
                     x = random.Next(_gameBoard.GetLength(0));
                     y = random.Next(_gameBoard.GetLength(1));
-                } while (_gameBoard[x, y].OccupiedByPlayer != null || _gameBoard[x, y].OccupiedByPlanet != null);
+                } while (_gameBoard[x, y].OccupiedByPlanet != null); // Gezegenlerin üzerine oyuncu koyma
 
-                var homeBase = _gameBoard[x, y];
-                var player = new Player($"Player {i + 1}", (i % 2 == 0) ? ConsoleColor.Red : ConsoleColor.Blue, homeBase);
-                homeBase.OccupiedByPlayer = player;
+                var player = new Player($"Player {i + 1}", (ConsoleColor)(i + 1), _gameBoard[x, y]);
                 _players.Add(player);
+                _gameBoard[x, y].OccupiedByPlayer = player;
             }
         }
     }

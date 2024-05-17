@@ -1,37 +1,35 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using GalaxyWars.Models;
 
 namespace GalaxyWars.Display
 {
     public class GameDisplay
     {
-        private Cell[,] GameBoard;
+        private readonly Cell[,] _gameBoard;
 
         public GameDisplay(Cell[,] gameBoard)
         {
-            GameBoard = gameBoard;
+            _gameBoard = gameBoard;
         }
 
         public void DisplayGameBoard()
         {
-            for (int y = 0; y < GameBoard.GetLength(1); y++)
+            Console.WriteLine("\nCurrent Game Board:");
+            for (int y = 0; y < _gameBoard.GetLength(1); y++)
             {
-                for (int x = 0; x < GameBoard.GetLength(0); x++)
+                for (int x = 0; x < _gameBoard.GetLength(0); x++)
                 {
-                    if (GameBoard[x, y].OccupiedByPlanet != null)
+                    Cell cell = _gameBoard[x, y];
+                    if (cell.OccupiedByPlanet != null)
                     {
-                        var planet = GameBoard[x, y].OccupiedByPlanet;
-                        if (planet!.OccupiedBy != null)
-                        {
-                            Console.ForegroundColor = planet.OccupiedBy.Color;
-                        }
+                        Console.ForegroundColor = cell.OccupiedByPlanet.Color;
                         Console.Write(" @ ");
                         Console.ResetColor();
                     }
-                    else if (GameBoard[x, y].OccupiedByPlayer != null)
+                    else if (cell.OccupiedByPlayer != null)
                     {
-                        Console.ForegroundColor = GameBoard[x, y].OccupiedByPlayer!.Color;
+                        Console.ForegroundColor = cell.OccupiedByPlayer.Color;
                         Console.Write(" P ");
                         Console.ResetColor();
                     }
@@ -42,80 +40,53 @@ namespace GalaxyWars.Display
                 }
                 Console.WriteLine();
             }
-        }
-
-        public void DisplayFleets(Player player)
-        {
-            for (int i = 0; i < player.Fleets.Count; i++)
-            {
-                Console.WriteLine($"{i + 1}. {player.Fleets[i].Name} at ({player.Fleets[i].CurrentLocation.X}, {player.Fleets[i].CurrentLocation.Y})");
-            }
-        }
-
-        public void DisplayEnemyFleets(Player player, List<Player> players, List<Planet> planets)
-        {
-            var enemyFleets = players.Where(p => p != player)
-                                     .SelectMany(p => p.Fleets)
-                                     .ToList();
-
-            Console.WriteLine("Enemy Fleets:");
-            for (int i = 0; i < enemyFleets.Count; i++)
-            {
-                var fleet = enemyFleets[i];
-                var planet = planets.FirstOrDefault(p => p.Position == fleet.CurrentLocation);
-                string location = planet != null ? $"{planet.Name} ({planet.Position.X}, {planet.Position.Y})" : $"({fleet.CurrentLocation.X}, {fleet.CurrentLocation.Y})";
-                Console.WriteLine($"{i + 1}. {fleet.Name} at {location}");
-            }
+            Console.WriteLine();
         }
 
         public void DisplayOccupiedPlanetsAndFleets(Player player, List<Planet> planets)
         {
-            Console.WriteLine($"{player.Name}'s occupied planets and fleets:");
             var occupiedPlanets = planets.Where(p => p.OccupiedBy == player).ToList();
             if (occupiedPlanets.Any())
             {
-                Console.WriteLine("Occupied Planets:");
+                Console.WriteLine($"{player.Name}'s occupied planets and fleets:");
                 foreach (var planet in occupiedPlanets)
                 {
-                    Console.WriteLine($"- {planet.Name} at ({planet.Position.X}, {planet.Position.Y}) - Defense: {planet.DefenseCapacity}");
+                    Console.WriteLine($"- {planet.Name} (Defense: {planet.DefenseCapacity})");
+                    var fleets = player.Fleets.Where(f => f.CurrentLocation == planet.Position).ToList();
+                    if (fleets.Any())
+                    {
+                        Console.WriteLine("  Fleets:");
+                        foreach (var fleet in fleets)
+                        {
+                            Console.WriteLine($"  - {fleet.Name}");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("  No fleets at this planet.");
+                    }
                 }
             }
             else
             {
-                Console.WriteLine("No occupied planets.");
-            }
-
-            if (player.Fleets.Any())
-            {
-                Console.WriteLine("Fleets:");
-                foreach (var fleet in player.Fleets)
-                {
-                    Console.WriteLine($"- {fleet.Name} at ({fleet.CurrentLocation.X}, {fleet.CurrentLocation.Y})");
-                }
-            }
-            else
-            {
-                Console.WriteLine("No fleets.");
+                Console.WriteLine($"{player.Name} does not occupy any planets.");
             }
         }
 
         public void DisplayAllOccupiedPlanets(List<Planet> planets)
         {
-            Console.WriteLine("All occupied planets:");
             var occupiedPlanets = planets.Where(p => p.OccupiedBy != null).ToList();
             if (occupiedPlanets.Any())
             {
+                Console.WriteLine("All occupied planets:");
                 foreach (var planet in occupiedPlanets)
                 {
-                    var ownerName = planet.OccupiedBy != null ? planet.OccupiedBy.Name : "None";
-                    Console.ForegroundColor = planet.OccupiedBy!.Color;
-                    Console.WriteLine($"- {planet.Name} at ({planet.Position.X}, {planet.Position.Y}) - Defense: {planet.DefenseCapacity} - Occupied by: {ownerName}");
-                    Console.ResetColor();
+                    Console.WriteLine($"- {planet.Name} (Occupied by: {planet.OccupiedBy!.Name}, Defense: {planet.DefenseCapacity})");
                 }
             }
             else
             {
-                Console.WriteLine("No occupied planets.");
+                Console.WriteLine("No planets are currently occupied.");
             }
         }
     }

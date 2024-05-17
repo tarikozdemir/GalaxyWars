@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing; // System.Drawing namespace'ini kullanıyoruz.
 using System.Linq;
 using GalaxyWars.Display;
 using GalaxyWars.Handlers;
+using GalaxyWars.Models;
 using GalaxyWars.Setup;
 
 namespace GalaxyWars
@@ -16,11 +16,11 @@ namespace GalaxyWars
         private const int BoardWidth = 20;
         private const int BoardHeight = 20;
 
-        private IPlayerActionHandler _playerActionHandler;
-        private IFleetActionHandler _fleetActionHandler;
-        private GameDisplay _gameDisplay;
-        private PlayerSetup _playerSetup;
-        private PlanetSetup _planetSetup;
+        private readonly IPlayerActionHandler _playerActionHandler;
+        private readonly IFleetActionHandler _fleetActionHandler;
+        private readonly GameDisplay _gameDisplay;
+        private readonly PlayerSetup _playerSetup;
+        private readonly PlanetSetup _planetSetup;
 
         public Game(IPlayerActionHandler playerActionHandler, IFleetActionHandler fleetActionHandler)
         {
@@ -34,12 +34,6 @@ namespace GalaxyWars
             _gameDisplay = new GameDisplay(GameBoard);
             _playerSetup = new PlayerSetup(GameBoard, Players, this, 2); // 2 oyunculu ayarlama
             _planetSetup = new PlanetSetup(GameBoard, Planets);
-        }
-
-        public void SetHandlers(IPlayerActionHandler playerActionHandler, IFleetActionHandler fleetActionHandler)
-        {
-            _playerActionHandler = playerActionHandler;
-            _fleetActionHandler = fleetActionHandler;
         }
 
         private void InitializeGameBoard()

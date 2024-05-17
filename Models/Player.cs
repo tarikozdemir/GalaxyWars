@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Drawing;
 
-namespace GalaxyWars
+namespace GalaxyWars.Models
 {
     public class Player
     {
@@ -16,7 +17,6 @@ namespace GalaxyWars
         public Cell HomeBase { get; set; }
         public ConsoleColor Color { get; set; }
 
-        // Yeni constructor
         public Player(string name, ConsoleColor color, Cell homeBase)
         {
             Name = name;
@@ -43,39 +43,42 @@ namespace GalaxyWars
 
         public bool CanCreateFleet()
         {
-            // Oyuncunun filolara atanmamış gemileri var mı kontrol eder
             return SpaceShips.Any(ship => !Fleets.SelectMany(f => f.Ships).Contains(ship));
+        }
+
+        public void CreateFleet(string fleetName, Game game)
+        {
+            if (CanCreateFleet())
+            {
+                Fleet newFleet = new Fleet(fleetName, HomeBase.Position, this, game);
+                AddShipsToFleet(newFleet);
+                Fleets.Add(newFleet);
+                Console.WriteLine($"Fleet {fleetName} has been created.");
+            }
+            else
+            {
+                Console.WriteLine("No available ships to create a new fleet.");
+            }
         }
 
         public void AddShipsToFleet(Fleet fleet)
         {
-            Console.WriteLine("Select ships to add to the fleet:");
-            var availableShips = SpaceShips.Where(ship => !Fleets.SelectMany(f => f.Ships).Contains(ship)).ToList();
-            if (availableShips.Count == 0)
+            Console.WriteLine("Select ships to add to the fleet (comma-separated indices):");
+            for (int i = 0; i < SpaceShips.Count; i++)
             {
-                Console.WriteLine("No available ships to add to the fleet.");
-                return;
-            }
-
-            for (int i = 0; i < availableShips.Count; i++)
-            {
-                Console.WriteLine($"{i + 1}. {availableShips[i].Name}");
-            }
-
-            Console.WriteLine("Enter the numbers of the ships to add to the fleet (comma-separated):");
-            string input = Console.ReadLine()!;
-            var shipNumbers = input.Split(',').Select(int.Parse).ToList();
-
-            foreach (var number in shipNumbers)
-            {
-                if (number > 0 && number <= availableShips.Count)
+                if (!Fleets.SelectMany(f => f.Ships).Contains(SpaceShips[i]))
                 {
-                    var ship = availableShips[number - 1];
-                    fleet.AddShip(ship);
+                    Console.WriteLine($"{i + 1}. {SpaceShips[i].Name}");
                 }
-                else
+            }
+
+            string input = Console.ReadLine()!;
+            var indices = input.Split(',').Select(index => int.Parse(index.Trim()) - 1).ToList();
+            foreach (var index in indices)
+            {
+                if (index >= 0 && index < SpaceShips.Count)
                 {
-                    Console.WriteLine("Invalid ship number.");
+                    fleet.AddShip(SpaceShips[index]);
                 }
             }
         }
@@ -84,13 +87,13 @@ namespace GalaxyWars
         {
             if (Gold >= amount)
             {
-                planet.DefenseCapacity += amount;
                 Gold -= amount;
-                Console.WriteLine($"{planet.Name}'s defense has been upgraded by {amount}. New defense capacity: {planet.DefenseCapacity}");
+                planet.DefenseCapacity += amount;
+                Console.WriteLine($"{planet.Name} defense upgraded by {amount}.");
             }
             else
             {
-                Console.WriteLine("Not enough gold to upgrade the planet's defense.");
+                Console.WriteLine("Not enough gold to upgrade defense.");
             }
         }
     }
