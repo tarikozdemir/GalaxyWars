@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/tarik/Desktop/GalaxyWars/GalaxyWars/GalaxyWars.csproj": {}
+    "/Users/tarik/Documents/GitHub/GalaxyWars/GalaxyWars.csproj": {}
   },
   "projects": {
-    "/Users/tarik/Desktop/GalaxyWars/GalaxyWars/GalaxyWars.csproj": {
+    "/Users/tarik/Documents/GitHub/GalaxyWars/GalaxyWars.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/tarik/Desktop/GalaxyWars/GalaxyWars/GalaxyWars.csproj",
+        "projectUniqueName": "/Users/tarik/Documents/GitHub/GalaxyWars/GalaxyWars.csproj",
         "projectName": "GalaxyWars",
-        "projectPath": "/Users/tarik/Desktop/GalaxyWars/GalaxyWars/GalaxyWars.csproj",
+        "projectPath": "/Users/tarik/Documents/GitHub/GalaxyWars/GalaxyWars.csproj",
         "packagesPath": "/Users/tarik/.nuget/packages/",
-        "outputPath": "/Users/tarik/Desktop/GalaxyWars/GalaxyWars/obj/",
+        "outputPath": "/Users/tarik/Documents/GitHub/GalaxyWars/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/tarik/.nuget/NuGet/NuGet.Config"
