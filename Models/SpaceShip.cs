@@ -2,10 +2,15 @@ using System;
 
 namespace GalaxyWars
 {
-    // Uzay gemisi tiplerini tanımlayan enum
     public enum SpaceShipType
     {
-        Scout, Fighter, Frigate, Destroyer, Cruiser, CapitalShip, Freighter
+        Scout,
+        Fighter,
+        Frigate,
+        Destroyer,
+        Cruiser,
+        CapitalShip,
+        Freighter
     }
 
     public class SpaceShip

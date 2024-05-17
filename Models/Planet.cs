@@ -11,7 +11,6 @@ namespace GalaxyWars
         public Point Position { get; set; }
         public Player? OccupiedBy { get; set; }
         public int DefenseCapacity { get; set; }
-        public ConsoleColor Color { get; set; }
 
         public Planet(string name, Point position)
         {
@@ -22,8 +21,7 @@ namespace GalaxyWars
                 { "Iron", 100 },
                 { "Gold", 50 }
             };
-            DefenseCapacity = 100;
-            Color = ConsoleColor.Gray; // Varsayılan renk
+            DefenseCapacity = 0;
         }
 
         public void AddResource(string resource, int amount)
@@ -45,23 +43,25 @@ namespace GalaxyWars
                 Console.WriteLine($"{OccupiedBy.Name} has lost control of {Name}.");
             }
             OccupiedBy = player;
-            Color = player.Color; // Gezegenin rengi oyuncunun rengiyle değiştiriliyor
             Console.WriteLine($"{player.Name} has taken control of {Name}.");
-        }
-
-        public void UpgradeDefense(int amount)
-        {
-            DefenseCapacity += amount;
-            Console.WriteLine($"{Name} defense upgraded by {amount}. Current defense: {DefenseCapacity}");
         }
 
         public void ProduceResources()
         {
-            foreach (var resource in Resources.Keys.ToList())
+            foreach (var resource in Resources)
             {
-                Resources[resource] += 10;
+                Resources[resource.Key] += 10; // Her turda 10 birim kaynak üretiyoruz
             }
-            Console.WriteLine($"{Name} produced resources. Current resources: {string.Join(", ", Resources.Select(r => $"{r.Key}: {r.Value}"))}");
+
+            if (OccupiedBy != null)
+            {
+                foreach (var resource in Resources)
+                {
+                    OccupiedBy.AddResource(resource.Key, resource.Value);
+                }
+
+                Console.WriteLine($"{OccupiedBy.Name} has collected resources from {Name}.");
+            }
         }
     }
 }

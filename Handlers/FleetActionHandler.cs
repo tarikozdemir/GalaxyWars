@@ -76,11 +76,15 @@ namespace GalaxyWars.Handlers
                 // Düşman filoları ve bulundukları gezegenleri listele
                 _gameDisplay.DisplayEnemyFleets(player, _game.Players, _game.Planets);
 
+                var enemyFleets = _game.Players.Where(p => p != player)
+                    .SelectMany(p => p.Fleets)
+                    .ToList();
+
                 Console.WriteLine("Select a target fleet number:");
                 var targetInput = Console.ReadLine();
-                if (int.TryParse(targetInput, out var targetIndex) && targetIndex > 0 && targetIndex <= player.Fleets.Count)
+                if (int.TryParse(targetInput, out var targetIndex) && targetIndex > 0 && targetIndex <= enemyFleets.Count)
                 {
-                    var targetFleet = player.Fleets[targetIndex - 1];
+                    var targetFleet = enemyFleets[targetIndex - 1];
                     attackingFleet.Attack(targetFleet);
                 }
                 else

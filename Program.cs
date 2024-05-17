@@ -1,6 +1,7 @@
-﻿using GalaxyWars;
+﻿using System;
 using GalaxyWars.Display;
 using GalaxyWars.Handlers;
+using GalaxyWars.Setup;
 
 namespace GalaxyWars
 {
@@ -8,20 +9,11 @@ namespace GalaxyWars
     {
         static void Main(string[] args)
         {
-            // Önce GameDisplay nesnesini oluşturuyoruz
-            var gameDisplay = new GameDisplay(new Cell[20, 20]);
-
-            // Önce Game nesnesini null handler'lar ile oluşturuyoruz
-            Game game = new Game(null, null);
-
-            // Daha sonra PlayerActionHandler ve FleetActionHandler nesnelerini oluşturuyoruz
+            var game = new Game(new PlayerActionHandler(null!), new FleetActionHandler(null!, null!));
             var playerActionHandler = new PlayerActionHandler(game);
-            var fleetActionHandler = new FleetActionHandler(game, gameDisplay);
-
-            // Şimdi game nesnesini güncelliyoruz ve handler'ları enjekte ediyoruz
+            var fleetActionHandler = new FleetActionHandler(game, new GameDisplay(game.GameBoard));
             game.SetHandlers(playerActionHandler, fleetActionHandler);
 
-            // Oyunu başlatıyoruz
             game.InitializeGame();
             game.StartGameLoop();
         }
