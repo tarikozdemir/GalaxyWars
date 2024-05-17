@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/tarik/Desktop/GalaxyWars 18-11-43-142/GalaxyWars.csproj",
+      "projectUniqueName": "/Users/tarik/Documents/GitHub/GalaxyWars/GalaxyWars.csproj",
       "projectName": "GalaxyWars",
-      "projectPath": "/Users/tarik/Desktop/GalaxyWars 18-11-43-142/GalaxyWars.csproj",
+      "projectPath": "/Users/tarik/Documents/GitHub/GalaxyWars/GalaxyWars.csproj",
       "packagesPath": "/Users/tarik/.nuget/packages/",
-      "outputPath": "/Users/tarik/Desktop/GalaxyWars 18-11-43-142/obj/",
+      "outputPath": "/Users/tarik/Documents/GitHub/GalaxyWars/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/tarik/.nuget/NuGet/NuGet.Config"
