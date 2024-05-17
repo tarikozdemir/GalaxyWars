@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing; // System.Drawing yerine System.Windows namespace'ini kullanabiliriz.
+using System.Drawing;
 using System.Linq;
 
 namespace GalaxyWars
@@ -9,7 +9,7 @@ namespace GalaxyWars
     {
         public List<SpaceShip> Ships { get; set; }
         public string Name { get; set; }
-        public Point CurrentLocation { get; set; } // Burada Point'i System.Drawing'den kullandık.
+        public Point CurrentLocation { get; set; }
         public Player Owner { get; set; }
         private Game _game;
 

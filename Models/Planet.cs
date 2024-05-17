@@ -11,6 +11,7 @@ namespace GalaxyWars
         public Point Position { get; set; }
         public Player? OccupiedBy { get; set; }
         public int DefenseCapacity { get; set; }
+        public ConsoleColor Color { get; set; } // Gezegenin rengi
 
         public Planet(string name, Point position)
         {
@@ -21,7 +22,8 @@ namespace GalaxyWars
                 { "Iron", 100 },
                 { "Gold", 50 }
             };
-            DefenseCapacity = 0;
+            DefenseCapacity = 100; // Varsayılan savunma kapasitesi
+            Color = ConsoleColor.Gray; // Varsayılan renk
         }
 
         public void AddResource(string resource, int amount)
@@ -43,6 +45,7 @@ namespace GalaxyWars
                 Console.WriteLine($"{OccupiedBy.Name} has lost control of {Name}.");
             }
             OccupiedBy = player;
+            Color = player.Color; // Gezegenin rengini oyuncunun rengine ayarla
             Console.WriteLine($"{player.Name} has taken control of {Name}.");
         }
 
@@ -50,17 +53,8 @@ namespace GalaxyWars
         {
             foreach (var resource in Resources)
             {
-                Resources[resource.Key] += 10; // Her turda 10 birim kaynak üretiyoruz
-            }
-
-            if (OccupiedBy != null)
-            {
-                foreach (var resource in Resources)
-                {
-                    OccupiedBy.AddResource(resource.Key, resource.Value);
-                }
-
-                Console.WriteLine($"{OccupiedBy.Name} has collected resources from {Name}.");
+                // Kaynak üretimi mantığı burada olacak, örneğin:
+                Resources[resource.Key] += 10;
             }
         }
     }

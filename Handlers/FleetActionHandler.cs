@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace GalaxyWars.Handlers
 {
@@ -20,8 +21,38 @@ namespace GalaxyWars.Handlers
             if (int.TryParse(input, out int fleetIndex) && fleetIndex > 0 && fleetIndex <= player.Fleets.Count)
             {
                 Fleet selectedFleet = player.Fleets[fleetIndex - 1];
-                // Move fleet logic here
-                Console.WriteLine($"Fleet {selectedFleet.Name} has been moved."); // Placeholder
+
+                // Gezegenlerin listesini göster
+                var planets = _game.Planets;
+                Console.WriteLine("Available Planets:");
+                for (int i = 0; i < planets.Count; i++)
+                {
+                    var planet = planets[i];
+                    string occupiedBy = planet.OccupiedBy != null ? planet.OccupiedBy.Name : "None";
+                    Console.WriteLine($"{i + 1}. {planet.Name} (Occupied by: {occupiedBy})");
+                }
+
+                Console.WriteLine("Select a planet to move the fleet to:");
+                string planetInput = Console.ReadLine()!;
+                if (int.TryParse(planetInput, out int planetIndex) && planetIndex > 0 && planetIndex <= planets.Count)
+                {
+                    var targetPlanet = planets[planetIndex - 1];
+                    if (targetPlanet.OccupiedBy == null || targetPlanet.OccupiedBy == player)
+                    {
+                        // Gezegen ele geçirilecek veya zaten bu oyuncuya ait
+                        targetPlanet.BeOccupied(player);
+                        selectedFleet.CurrentLocation = targetPlanet.Position;
+                        Console.WriteLine($"Fleet {selectedFleet.Name} has moved to {targetPlanet.Name} and occupied it.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("This planet is occupied by another player.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Invalid planet selection.");
+                }
             }
             else
             {
