@@ -13,21 +13,20 @@ namespace GalaxyWars
         public List<SpaceShip> SpaceShips { get; set; }
         public bool IsAlive => Health > 0;
         public Dictionary<string, int> Resources { get; private set; }
-        public ConsoleColor Color { get; set; }
         public Cell HomeBase { get; set; }
-        private readonly Game _game; // Game nesnesi
+        public ConsoleColor Color { get; set; }
 
-        public Player(string name, ConsoleColor color, Cell homeBase, Game game)
+        // Yeni constructor
+        public Player(string name, ConsoleColor color, Cell homeBase)
         {
             Name = name;
             Health = 100;
             Gold = 1000;
-            Color = color;
-            HomeBase = homeBase;
             Resources = new Dictionary<string, int>();
             Fleets = new List<Fleet>();
             SpaceShips = new List<SpaceShip>();
-            _game = game;
+            Color = color;
+            HomeBase = homeBase;
         }
 
         public void AddResource(string resource, int amount)
@@ -44,45 +43,39 @@ namespace GalaxyWars
 
         public bool CanCreateFleet()
         {
+            // Oyuncunun filolara atanmamış gemileri var mı kontrol eder
             return SpaceShips.Any(ship => !Fleets.SelectMany(f => f.Ships).Contains(ship));
-        }
-
-        public void CreateFleet(string fleetName)
-        {
-            if (CanCreateFleet())
-            {
-                var newFleet = new Fleet(fleetName, HomeBase.Position, this, _game);
-                AddShipsToFleet(newFleet);
-                Fleets.Add(newFleet);
-                Console.WriteLine($"Fleet {fleetName} has been created.");
-            }
-            else
-            {
-                Console.WriteLine("No available ships to create a new fleet.");
-            }
         }
 
         public void AddShipsToFleet(Fleet fleet)
         {
-            Console.WriteLine("Available ships to add to the fleet:");
+            Console.WriteLine("Select ships to add to the fleet:");
             var availableShips = SpaceShips.Where(ship => !Fleets.SelectMany(f => f.Ships).Contains(ship)).ToList();
+            if (availableShips.Count == 0)
+            {
+                Console.WriteLine("No available ships to add to the fleet.");
+                return;
+            }
+
             for (int i = 0; i < availableShips.Count; i++)
             {
                 Console.WriteLine($"{i + 1}. {availableShips[i].Name}");
             }
 
-            Console.WriteLine("Enter the numbers of the ships to add to the fleet, separated by commas:");
+            Console.WriteLine("Enter the numbers of the ships to add to the fleet (comma-separated):");
             string input = Console.ReadLine()!;
-            var selectedIndices = input.Split(',').Select(int.Parse).ToList();
-            foreach (var index in selectedIndices)
+            var shipNumbers = input.Split(',').Select(int.Parse).ToList();
+
+            foreach (var number in shipNumbers)
             {
-                if (index > 0 && index <= availableShips.Count)
+                if (number > 0 && number <= availableShips.Count)
                 {
-                    fleet.AddShip(availableShips[index - 1]);
+                    var ship = availableShips[number - 1];
+                    fleet.AddShip(ship);
                 }
                 else
                 {
-                    Console.WriteLine($"Invalid ship number: {index}");
+                    Console.WriteLine("Invalid ship number.");
                 }
             }
         }
@@ -93,11 +86,11 @@ namespace GalaxyWars
             {
                 planet.DefenseCapacity += amount;
                 Gold -= amount;
-                Console.WriteLine($"{planet.Name} defense upgraded by {amount}. Remaining gold: {Gold}");
+                Console.WriteLine($"{planet.Name}'s defense has been upgraded by {amount}. New defense capacity: {planet.DefenseCapacity}");
             }
             else
             {
-                Console.WriteLine("Not enough gold to upgrade defense.");
+                Console.WriteLine("Not enough gold to upgrade the planet's defense.");
             }
         }
     }

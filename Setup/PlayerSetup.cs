@@ -5,37 +5,35 @@ namespace GalaxyWars.Setup
 {
     public class PlayerSetup
     {
-        private const int BoardWidth = 20;
-        private const int BoardHeight = 20;
-        private Cell[,] GameBoard;
-        private List<Player> Players;
-        private readonly Game _game; // Game nesnesi
+        private readonly Cell[,] _gameBoard;
+        private readonly List<Player> _players;
+        private readonly Game _game;
+        private readonly int _numberOfPlayers;
 
-        public PlayerSetup(Cell[,] gameBoard, List<Player> players, Game game)
+        public PlayerSetup(Cell[,] gameBoard, List<Player> players, Game game, int numberOfPlayers)
         {
-            GameBoard = gameBoard;
-            Players = players;
+            _gameBoard = gameBoard;
+            _players = players;
             _game = game;
+            _numberOfPlayers = numberOfPlayers;
         }
 
         public void SetupPlayers()
         {
             var random = new Random();
-            var playerColors = new[] { ConsoleColor.Red, ConsoleColor.Blue, ConsoleColor.Green, ConsoleColor.Yellow };
-
-            for (int i = 0; i < 2; i++) // Örnek olarak 2 oyuncu ekliyoruz
+            for (int i = 0; i < _numberOfPlayers; i++)
             {
                 int x, y;
                 do
                 {
-                    x = random.Next(BoardWidth);
-                    y = random.Next(BoardHeight);
-                } while (GameBoard[x, y].OccupiedByPlanet != null || GameBoard[x, y].OccupiedByPlayer != null);
+                    x = random.Next(_gameBoard.GetLength(0));
+                    y = random.Next(_gameBoard.GetLength(1));
+                } while (_gameBoard[x, y].OccupiedByPlayer != null || _gameBoard[x, y].OccupiedByPlanet != null);
 
-                var homeBase = GameBoard[x, y];
-                Player player = new Player($"Player {i + 1}", playerColors[i % playerColors.Length], homeBase, _game);
-                Players.Add(player);
-                GameBoard[x, y].OccupiedByPlayer = player;
+                var homeBase = _gameBoard[x, y];
+                var player = new Player($"Player {i + 1}", (i % 2 == 0) ? ConsoleColor.Red : ConsoleColor.Blue, homeBase);
+                homeBase.OccupiedByPlayer = player;
+                _players.Add(player);
             }
         }
     }

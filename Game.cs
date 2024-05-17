@@ -32,7 +32,7 @@ namespace GalaxyWars
             _playerActionHandler = playerActionHandler;
             _fleetActionHandler = fleetActionHandler;
             _gameDisplay = new GameDisplay(GameBoard);
-            _playerSetup = new PlayerSetup(GameBoard, Players, this);
+            _playerSetup = new PlayerSetup(GameBoard, Players, this, 2); // İki oyuncu olarak ayarlıyoruz
             _planetSetup = new PlanetSetup(GameBoard, Planets);
         }
 
@@ -64,6 +64,13 @@ namespace GalaxyWars
         {
             bool gameRunning = true;
             int currentPlayerIndex = 0;
+
+            if (Players.Count == 0)
+            {
+                Console.WriteLine("No players initialized. Exiting game loop.");
+                return;
+            }
+
             while (gameRunning)
             {
                 _gameDisplay.DisplayGameBoard();
@@ -71,7 +78,7 @@ namespace GalaxyWars
                 Console.WriteLine($"It's {currentPlayer.Name}'s turn.");
                 _playerActionHandler.DisplayPlayerOptions(currentPlayer);
 
-                string command = Console.ReadLine()!;
+                string command = Console.ReadLine();
                 if (!string.IsNullOrEmpty(command))
                 {
                     _playerActionHandler.ProcessCommand(currentPlayer, command);
@@ -88,18 +95,25 @@ namespace GalaxyWars
 
         public void CreateFleetOption(Player player)
         {
-            Console.WriteLine("Enter the name of the new fleet:");
-            string fleetName = Console.ReadLine()!;
-            if (!string.IsNullOrEmpty(fleetName))
+            if (player.CanCreateFleet())
             {
-                var newFleet = new Fleet(fleetName, player.HomeBase.Position, player, this);
-                player.AddShipsToFleet(newFleet);
-                player.Fleets.Add(newFleet);
-                Console.WriteLine($"Fleet '{fleetName}' has been created.");
+                Console.WriteLine("Enter the name of the new fleet:");
+                string fleetName = Console.ReadLine();
+                if (!string.IsNullOrEmpty(fleetName))
+                {
+                    var newFleet = new Fleet(fleetName, player.HomeBase.Position, player, this);
+                    player.AddShipsToFleet(newFleet);
+                    player.Fleets.Add(newFleet);
+                    Console.WriteLine($"Fleet '{fleetName}' has been created.");
+                }
+                else
+                {
+                    Console.WriteLine("Invalid fleet name entered.");
+                }
             }
             else
             {
-                Console.WriteLine("Invalid fleet name entered.");
+                Console.WriteLine("No available ships to create a new fleet.");
             }
         }
 

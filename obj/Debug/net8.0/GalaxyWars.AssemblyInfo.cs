@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GalaxyWars")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+86d09edbcf60119c70891ab4a880681f61434f6d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+aa2add73780b5c2ab9b999b59bea28916681d3a3")]
 [assembly: System.Reflection.AssemblyProductAttribute("GalaxyWars")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GalaxyWars")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
