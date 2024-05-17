@@ -32,7 +32,7 @@ namespace GalaxyWars
             _playerActionHandler = playerActionHandler;
             _fleetActionHandler = fleetActionHandler;
             _gameDisplay = new GameDisplay(GameBoard);
-            _playerSetup = new PlayerSetup(GameBoard, Players);
+            _playerSetup = new PlayerSetup(GameBoard, Players, this);
             _planetSetup = new PlanetSetup(GameBoard, Planets);
         }
 
@@ -71,8 +71,11 @@ namespace GalaxyWars
                 Console.WriteLine($"It's {currentPlayer.Name}'s turn.");
                 _playerActionHandler.DisplayPlayerOptions(currentPlayer);
 
-                string command = Console.ReadLine();
-                _playerActionHandler.ProcessCommand(currentPlayer, command);
+                string command = Console.ReadLine()!;
+                if (!string.IsNullOrEmpty(command))
+                {
+                    _playerActionHandler.ProcessCommand(currentPlayer, command);
+                }
 
                 foreach (var planet in Planets)
                 {
@@ -86,10 +89,10 @@ namespace GalaxyWars
         public void CreateFleetOption(Player player)
         {
             Console.WriteLine("Enter the name of the new fleet:");
-            string fleetName = Console.ReadLine();
+            string fleetName = Console.ReadLine()!;
             if (!string.IsNullOrEmpty(fleetName))
             {
-                var newFleet = new Fleet(fleetName, new Point(0, 0), player);
+                var newFleet = new Fleet(fleetName, player.HomeBase.Position, player, this);
                 player.AddShipsToFleet(newFleet);
                 player.Fleets.Add(newFleet);
                 Console.WriteLine($"Fleet '{fleetName}' has been created.");
@@ -145,9 +148,14 @@ namespace GalaxyWars
             }
         }
 
-        public void DisplayOccupiedPlanets(Player player)
+        public void DisplayOccupiedPlanetsAndFleets(Player player)
         {
-            _gameDisplay.DisplayOccupiedPlanets(player, Planets);
+            _gameDisplay.DisplayOccupiedPlanetsAndFleets(player, Planets);
+        }
+
+        public void DisplayAllOccupiedPlanets()
+        {
+            _gameDisplay.DisplayAllOccupiedPlanets(Planets);
         }
     }
 }

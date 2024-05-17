@@ -20,3 +20,10 @@
 /Users/tarik/Documents/GitHub/GalaxyWars/obj/Debug/net8.0/GalaxyWars.dll
 /Users/tarik/Documents/GitHub/GalaxyWars/obj/Debug/net8.0/refint/GalaxyWars.dll
 /Users/tarik/Documents/GitHub/GalaxyWars/obj/Debug/net8.0/GalaxyWars.pdb
+/Users/tarik/Documents/GitHub/GalaxyWars/bin/Debug/net8.0/GalaxyWars
+/Users/tarik/Documents/GitHub/GalaxyWars/bin/Debug/net8.0/GalaxyWars.deps.json
+/Users/tarik/Documents/GitHub/GalaxyWars/bin/Debug/net8.0/GalaxyWars.runtimeconfig.json
+/Users/tarik/Documents/GitHub/GalaxyWars/bin/Debug/net8.0/GalaxyWars.dll
+/Users/tarik/Documents/GitHub/GalaxyWars/bin/Debug/net8.0/GalaxyWars.pdb
+/Users/tarik/Documents/GitHub/GalaxyWars/obj/Debug/net8.0/GalaxyWars.genruntimeconfig.cache
+/Users/tarik/Documents/GitHub/GalaxyWars/obj/Debug/net8.0/ref/GalaxyWars.dll
