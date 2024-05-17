@@ -41,6 +41,12 @@ namespace GalaxyWars
 
         public void Attack(Fleet targetFleet)
         {
+            if (targetFleet == null || targetFleet.Ships == null || !targetFleet.Ships.Any())
+            {
+                Console.WriteLine("Target fleet does not exist or has no ships.");
+                return;
+            }
+
             int totalFirePower = Ships.Sum(ship => ship.FirePower);
             int targetTotalFirePower = targetFleet.Ships.Sum(ship => ship.FirePower);
 
@@ -51,7 +57,7 @@ namespace GalaxyWars
                 Console.WriteLine($"{Name} has won the battle against {targetFleet.Name}!");
                 targetFleet.Ships.Clear();
                 Console.WriteLine($"{targetFleet.Name} has been destroyed.");
-                var targetPlanet = _game.Planets.FirstOrDefault(p => p.Position == targetFleet.CurrentLocation);
+                var targetPlanet = _game?.Planets?.FirstOrDefault(p => p.Position == targetFleet.CurrentLocation);
                 if (targetPlanet != null)
                 {
                     targetPlanet.BeOccupied(Owner);
