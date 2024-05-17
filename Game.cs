@@ -21,8 +21,11 @@ namespace GalaxyWars
         private GameDisplay _gameDisplay;
         private PlayerSetup _playerSetup;
         private PlanetSetup _planetSetup;
+        private bool _gameRunning;
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         public Game()
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         {
             Players = new List<Player>();
             Planets = new List<Planet>();
@@ -59,7 +62,7 @@ namespace GalaxyWars
 
         public void StartGameLoop()
         {
-            bool gameRunning = true;
+            _gameRunning = true;
             int currentPlayerIndex = 0;
 
             if (Players.Count == 0)
@@ -68,16 +71,14 @@ namespace GalaxyWars
                 return;
             }
 
-            while (gameRunning)
+            while (_gameRunning)
             {
                 _gameDisplay.DisplayGameBoard();
                 Player currentPlayer = Players[currentPlayerIndex];
                 Console.WriteLine($"It's {currentPlayer.Name}'s turn.");
                 _playerActionHandler.DisplayPlayerOptions(currentPlayer);
 
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-                string command = Console.ReadLine();
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+                string command = Console.ReadLine()!;
                 if (!string.IsNullOrEmpty(command))
                 {
                     _playerActionHandler.ProcessCommand(currentPlayer, command);
@@ -97,9 +98,7 @@ namespace GalaxyWars
             if (player.CanCreateFleet())
             {
                 Console.WriteLine("Enter the name of the new fleet:");
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-                string fleetName = Console.ReadLine();
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+                string fleetName = Console.ReadLine()!;
                 if (!string.IsNullOrEmpty(fleetName))
                 {
                     var newFleet = new Fleet(fleetName, player.HomeBase.Position, player, this);
@@ -171,6 +170,28 @@ namespace GalaxyWars
         public void DisplayAllOccupiedPlanets()
         {
             _gameDisplay.DisplayAllOccupiedPlanets(Planets);
+        }
+
+        public void DisplayPlayerFleets(Player player)
+        {
+            if (player.Fleets.Any())
+            {
+                Console.WriteLine($"Fleets of {player.Name}:");
+                foreach (var fleet in player.Fleets)
+                {
+                    Console.WriteLine($"- {fleet.Name} at {fleet.CurrentLocation}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("You do not have any fleets.");
+            }
+        }
+
+        public void EndGame()
+        {
+            _gameRunning = false;
+            Console.WriteLine("Game has ended.");
         }
     }
 }

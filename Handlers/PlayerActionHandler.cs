@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using GalaxyWars.Models;
 
 namespace GalaxyWars.Handlers
@@ -21,9 +22,11 @@ namespace GalaxyWars.Handlers
             Console.WriteLine("3. Move Fleet");
             Console.WriteLine("4. Attack");
             Console.WriteLine("5. Upgrade Planet Defense");
-            Console.WriteLine("6. View Occupied Planets and Fleets");
-            Console.WriteLine("7. View All Occupied Planets");
+            Console.WriteLine("6. View Your Fleets");
+            Console.WriteLine("7. View Occupied Planets and Fleets");
+            Console.WriteLine("8. View All Occupied Planets");
             Console.WriteLine("0. End Turn");
+            Console.WriteLine("9. End Game"); // "End Game" seçeneği en sona taşındı
             Console.ResetColor();
         }
 
@@ -61,13 +64,19 @@ namespace GalaxyWars.Handlers
                     _game.UpgradePlanetDefenseOption(player);
                     break;
                 case "6":
-                    _game.DisplayOccupiedPlanetsAndFleets(player);
+                    _game.DisplayPlayerFleets(player);
                     break;
                 case "7":
+                    _game.DisplayOccupiedPlanetsAndFleets(player);
+                    break;
+                case "8":
                     _game.DisplayAllOccupiedPlanets();
                     break;
                 case "0":
                     Console.WriteLine("Ending turn.");
+                    break;
+                case "9":
+                    _game.EndGame();
                     break;
                 default:
                     Console.WriteLine("Invalid command.");
@@ -110,9 +119,7 @@ namespace GalaxyWars.Handlers
             }
 
             Console.WriteLine("Enter the number of the spaceship you want to buy:");
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-            string input = Console.ReadLine();
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+            string input = Console.ReadLine()!;
             if (int.TryParse(input, out int choice) && choice > 0 && choice <= availableShips.Length)
             {
                 var selectedShip = availableShips[choice - 1];
