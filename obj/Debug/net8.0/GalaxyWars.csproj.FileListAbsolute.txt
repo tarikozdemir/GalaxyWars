@@ -12,3 +12,11 @@
 /Users/tarik/Desktop/GalaxyWars/GalaxyWars/obj/Debug/net8.0/GalaxyWars.pdb
 /Users/tarik/Desktop/GalaxyWars/GalaxyWars/obj/Debug/net8.0/GalaxyWars.genruntimeconfig.cache
 /Users/tarik/Desktop/GalaxyWars/GalaxyWars/obj/Debug/net8.0/ref/GalaxyWars.dll
+/Users/tarik/Documents/GitHub/GalaxyWars/obj/Debug/net8.0/GalaxyWars.GeneratedMSBuildEditorConfig.editorconfig
+/Users/tarik/Documents/GitHub/GalaxyWars/obj/Debug/net8.0/GalaxyWars.AssemblyInfoInputs.cache
+/Users/tarik/Documents/GitHub/GalaxyWars/obj/Debug/net8.0/GalaxyWars.AssemblyInfo.cs
+/Users/tarik/Documents/GitHub/GalaxyWars/obj/Debug/net8.0/GalaxyWars.csproj.CoreCompileInputs.cache
+/Users/tarik/Documents/GitHub/GalaxyWars/obj/Debug/net8.0/GalaxyWars.sourcelink.json
+/Users/tarik/Documents/GitHub/GalaxyWars/obj/Debug/net8.0/GalaxyWars.dll
+/Users/tarik/Documents/GitHub/GalaxyWars/obj/Debug/net8.0/refint/GalaxyWars.dll
+/Users/tarik/Documents/GitHub/GalaxyWars/obj/Debug/net8.0/GalaxyWars.pdb
