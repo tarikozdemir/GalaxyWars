@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
+using System.Drawing; // System.Drawing yerine System.Windows namespace'ini kullanabiliriz.
 using System.Linq;
 
 namespace GalaxyWars
@@ -9,19 +9,19 @@ namespace GalaxyWars
     {
         public List<SpaceShip> Ships { get; set; }
         public string Name { get; set; }
-        public Point CurrentLocation { get; set; }
+        public Point CurrentLocation { get; set; } // Burada Point'i System.Drawing'den kullandık.
         public Player Owner { get; set; }
-        private readonly Game _game;
+        private Game _game;
 
         public int Speed => Ships.Min(ship => ship.MaxSpeed);
 
         public Fleet(string name, Point currentLocation, Player owner, Game game)
         {
             Name = name;
-            Ships = new List<SpaceShip>();
             CurrentLocation = currentLocation;
             Owner = owner;
             _game = game;
+            Ships = new List<SpaceShip>();
         }
 
         public void AddShip(SpaceShip ship)
@@ -41,41 +41,26 @@ namespace GalaxyWars
 
         public void Attack(Fleet targetFleet)
         {
-            if (targetFleet == null || targetFleet.Ships == null || !targetFleet.Ships.Any())
-            {
-                Console.WriteLine("Target fleet does not exist or has no ships.");
-                return;
-            }
-
             int totalFirePower = Ships.Sum(ship => ship.FirePower);
             int targetTotalFirePower = targetFleet.Ships.Sum(ship => ship.FirePower);
-
-            Console.WriteLine($"{Name} is attacking {targetFleet.Name}.");
 
             if (totalFirePower > targetTotalFirePower)
             {
                 Console.WriteLine($"{Name} has won the battle against {targetFleet.Name}!");
-                targetFleet.Ships.Clear();
-                Console.WriteLine($"{targetFleet.Name} has been destroyed.");
-                var targetPlanet = _game?.Planets?.FirstOrDefault(p => p.Position == targetFleet.CurrentLocation);
-                if (targetPlanet != null)
-                {
-                    targetPlanet.BeOccupied(Owner);
-                }
-            }
-            else if (totalFirePower < targetTotalFirePower)
-            {
-                Console.WriteLine($"{Name} has lost the battle against {targetFleet.Name}.");
-                Ships.Clear();
-                Console.WriteLine($"{Name} has been destroyed.");
+                targetFleet.Destroy();
             }
             else
             {
-                Console.WriteLine("The battle ended in a draw.");
-                Ships.Clear();
-                targetFleet.Ships.Clear();
-                Console.WriteLine("Both fleets have been destroyed.");
+                Console.WriteLine($"{Name} has lost the battle against {targetFleet.Name}.");
+                this.Destroy();
             }
+        }
+
+        public void Destroy()
+        {
+            Console.WriteLine($"Fleet {Name} has been destroyed.");
+            Ships.Clear();
+            Owner.Fleets.Remove(this);
         }
     }
 }

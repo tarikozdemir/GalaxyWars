@@ -1,5 +1,4 @@
 using System;
-using GalaxyWars.Display;
 
 namespace GalaxyWars.Handlers
 {

@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
+using System.Drawing; // System.Drawing namespace'ini kullanıyoruz.
 using System.Linq;
 using GalaxyWars.Display;
 using GalaxyWars.Handlers;
@@ -32,7 +32,7 @@ namespace GalaxyWars
             _playerActionHandler = playerActionHandler;
             _fleetActionHandler = fleetActionHandler;
             _gameDisplay = new GameDisplay(GameBoard);
-            _playerSetup = new PlayerSetup(GameBoard, Players, this, 2); // İki oyuncu olarak ayarlıyoruz
+            _playerSetup = new PlayerSetup(GameBoard, Players, this, 2); // 2 oyunculu ayarlama
             _planetSetup = new PlanetSetup(GameBoard, Planets);
         }
 
@@ -78,7 +78,7 @@ namespace GalaxyWars
                 Console.WriteLine($"It's {currentPlayer.Name}'s turn.");
                 _playerActionHandler.DisplayPlayerOptions(currentPlayer);
 
-                string command = Console.ReadLine();
+                string command = Console.ReadLine()!;
                 if (!string.IsNullOrEmpty(command))
                 {
                     _playerActionHandler.ProcessCommand(currentPlayer, command);
@@ -98,7 +98,7 @@ namespace GalaxyWars
             if (player.CanCreateFleet())
             {
                 Console.WriteLine("Enter the name of the new fleet:");
-                string fleetName = Console.ReadLine();
+                string fleetName = Console.ReadLine()!;
                 if (!string.IsNullOrEmpty(fleetName))
                 {
                     var newFleet = new Fleet(fleetName, player.HomeBase.Position, player, this);
