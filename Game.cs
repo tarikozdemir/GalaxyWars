@@ -16,19 +16,22 @@ namespace GalaxyWars
         private const int BoardWidth = 20;
         private const int BoardHeight = 20;
 
-        private readonly IPlayerActionHandler _playerActionHandler;
-        private readonly IFleetActionHandler _fleetActionHandler;
-        private readonly GameDisplay _gameDisplay;
-        private readonly PlayerSetup _playerSetup;
-        private readonly PlanetSetup _planetSetup;
+        private IPlayerActionHandler _playerActionHandler;
+        private IFleetActionHandler _fleetActionHandler;
+        private GameDisplay _gameDisplay;
+        private PlayerSetup _playerSetup;
+        private PlanetSetup _planetSetup;
 
-        public Game(IPlayerActionHandler playerActionHandler, IFleetActionHandler fleetActionHandler)
+        public Game()
         {
             Players = new List<Player>();
             Planets = new List<Planet>();
             GameBoard = new Cell[BoardWidth, BoardHeight];
             InitializeGameBoard();
+        }
 
+        public void SetHandlers(IPlayerActionHandler playerActionHandler, IFleetActionHandler fleetActionHandler)
+        {
             _playerActionHandler = playerActionHandler;
             _fleetActionHandler = fleetActionHandler;
             _gameDisplay = new GameDisplay(GameBoard);
@@ -72,7 +75,7 @@ namespace GalaxyWars
                 Console.WriteLine($"It's {currentPlayer.Name}'s turn.");
                 _playerActionHandler.DisplayPlayerOptions(currentPlayer);
 
-                string command = Console.ReadLine()!;
+                string command = Console.ReadLine();
                 if (!string.IsNullOrEmpty(command))
                 {
                     _playerActionHandler.ProcessCommand(currentPlayer, command);
@@ -92,7 +95,7 @@ namespace GalaxyWars
             if (player.CanCreateFleet())
             {
                 Console.WriteLine("Enter the name of the new fleet:");
-                string fleetName = Console.ReadLine()!;
+                string fleetName = Console.ReadLine();
                 if (!string.IsNullOrEmpty(fleetName))
                 {
                     var newFleet = new Fleet(fleetName, player.HomeBase.Position, player, this);

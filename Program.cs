@@ -7,15 +7,16 @@ namespace GalaxyWars
     {
         static void Main(string[] args)
         {
-            // İlk olarak Game nesnesini tanımlıyoruz
-            Game game = null!;
+            Game game = null;
 
-            // Sonra PlayerActionHandler ve FleetActionHandler nesnelerini oluşturup ayarlıyoruz
+            // Game nesnesini oluşturduktan sonra PlayerActionHandler ve FleetActionHandler oluşturulacak
+            game = new Game();
+            
             var playerActionHandler = new PlayerActionHandler(game);
             var fleetActionHandler = new FleetActionHandler(game);
 
-            // Game nesnesini tanımlıyoruz ve oluşturuyoruz
-            game = new Game(playerActionHandler, fleetActionHandler);
+            // Handlers'ları game nesnesine set et
+            game.SetHandlers(playerActionHandler, fleetActionHandler);
 
             game.InitializeGame();
             game.StartGameLoop();
