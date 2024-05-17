@@ -15,10 +15,18 @@ namespace GalaxyWars.Handlers
 
         public void MoveFleet(Player player)
         {
+            if (!player.Fleets.Any())
+            {
+                Console.WriteLine("You do not have any fleets to move.");
+                return;
+            }
+
             Console.WriteLine("Available Fleets for Movement:");
             DisplayFleets(player);
             Console.WriteLine("Select a fleet to move:");
-            string input = Console.ReadLine()!;
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            string input = Console.ReadLine();
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             if (int.TryParse(input, out int fleetIndex) && fleetIndex > 0 && fleetIndex <= player.Fleets.Count)
             {
                 Fleet selectedFleet = player.Fleets[fleetIndex - 1];
@@ -34,7 +42,9 @@ namespace GalaxyWars.Handlers
                 }
 
                 Console.WriteLine("Select a planet to move the fleet to:");
-                string planetInput = Console.ReadLine()!;
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+                string planetInput = Console.ReadLine();
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                 if (int.TryParse(planetInput, out int planetIndex) && planetIndex > 0 && planetIndex <= planets.Count)
                 {
                     var targetPlanet = planets[planetIndex - 1];
@@ -63,13 +73,21 @@ namespace GalaxyWars.Handlers
 
         public void AttackSequence(Player player)
         {
+            if (!player.Fleets.Any())
+            {
+                Console.WriteLine("You do not have any fleets to attack with.");
+                return;
+            }
+
             Console.WriteLine("Available Fleets for Attack:");
             for (int i = 0; i < player.Fleets.Count; i++)
             {
                 Console.WriteLine($"{i + 1}. {player.Fleets[i].Name}");
             }
             Console.WriteLine("Select a fleet to attack with:");
-            string fleetInput = Console.ReadLine()!;
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            string fleetInput = Console.ReadLine();
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             if (int.TryParse(fleetInput, out int fleetIndex) && fleetIndex > 0 && fleetIndex <= player.Fleets.Count)
             {
                 Fleet attackingFleet = player.Fleets[fleetIndex - 1];
@@ -81,7 +99,9 @@ namespace GalaxyWars.Handlers
                 {
                     Console.WriteLine($"{i + 1}. {enemyFleets[i].Name} - Owner: {enemyFleets[i].Owner.Name}");
                 }
-                string targetInput = Console.ReadLine()!;
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+                string targetInput = Console.ReadLine();
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                 if (int.TryParse(targetInput, out int targetIndex) && targetIndex > 0 && targetIndex <= enemyFleets.Count)
                 {
                     Fleet targetFleet = enemyFleets[targetIndex - 1];

@@ -7,7 +7,9 @@ namespace GalaxyWars
     {
         static void Main(string[] args)
         {
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             Game game = null;
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
             // Game nesnesini oluşturduktan sonra PlayerActionHandler ve FleetActionHandler oluşturulacak
             game = new Game();

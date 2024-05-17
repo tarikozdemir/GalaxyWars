@@ -75,7 +75,9 @@ namespace GalaxyWars
                 Console.WriteLine($"It's {currentPlayer.Name}'s turn.");
                 _playerActionHandler.DisplayPlayerOptions(currentPlayer);
 
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 string command = Console.ReadLine();
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                 if (!string.IsNullOrEmpty(command))
                 {
                     _playerActionHandler.ProcessCommand(currentPlayer, command);
@@ -95,7 +97,9 @@ namespace GalaxyWars
             if (player.CanCreateFleet())
             {
                 Console.WriteLine("Enter the name of the new fleet:");
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 string fleetName = Console.ReadLine();
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                 if (!string.IsNullOrEmpty(fleetName))
                 {
                     var newFleet = new Fleet(fleetName, player.HomeBase.Position, player, this);

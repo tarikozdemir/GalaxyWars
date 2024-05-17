@@ -38,10 +38,24 @@ namespace GalaxyWars.Handlers
                     _game.CreateFleetOption(player);
                     break;
                 case "3":
-                    _game.MoveFleet(player);
+                    if (player.Fleets.Any())
+                    {
+                        _game.MoveFleet(player);
+                    }
+                    else
+                    {
+                        Console.WriteLine("You do not have any fleets to move.");
+                    }
                     break;
                 case "4":
-                    _game.AttackSequence(player);
+                    if (player.Fleets.Any())
+                    {
+                        _game.AttackSequence(player);
+                    }
+                    else
+                    {
+                        Console.WriteLine("You do not have any fleets to attack with.");
+                    }
                     break;
                 case "5":
                     _game.UpgradePlanetDefenseOption(player);
@@ -81,29 +95,32 @@ namespace GalaxyWars.Handlers
                 new SpaceShip("Colossus", SpaceShipType.Cruiser, 220, 410, 310, 520, 410, 1020),
                 new SpaceShip("Behemoth", SpaceShipType.Cruiser, 240, 420, 320, 540, 420, 1040),
                 new SpaceShip("Imperial Capital Ship", SpaceShipType.CapitalShip, 150, 500, 400, 600, 500, 1200),
-                new SpaceShip("Sovereign", SpaceShipType.CapitalShip, 170, 510, 410, 620, 510, 1220),
-                new SpaceShip("Emperor", SpaceShipType.CapitalShip, 190, 520, 420, 640, 520, 1240),
-                new SpaceShip("Cargo Freighter", SpaceShipType.Freighter, 100, 600, 500, 100, 600, 500),
-                new SpaceShip("Heavy Hauler", SpaceShipType.Freighter, 120, 610, 510, 120, 610, 520),
-                new SpaceShip("Bulk Transporter", SpaceShipType.Freighter, 140, 620, 520, 140, 620, 540)
+                new SpaceShip("Majestic", SpaceShipType.CapitalShip, 170, 510, 410, 620, 510, 1220),
+                new SpaceShip("Sovereign", SpaceShipType.CapitalShip, 190, 520, 420, 640, 520, 1240),
+                new SpaceShip("Mammoth Freighter", SpaceShipType.Freighter, 100, 600, 500, 100, 600, 1400),
+                new SpaceShip("Goliath", SpaceShipType.Freighter, 120, 610, 510, 120, 610, 1420),
+                new SpaceShip("Leviathan", SpaceShipType.Freighter, 140, 620, 520, 140, 620, 1440),
             };
 
             Console.WriteLine("Available Spaceships:");
             for (int i = 0; i < availableShips.Length; i++)
             {
-                Console.WriteLine($"{i + 1}. {availableShips[i].Name} - Type: {availableShips[i].Type}, Speed: {availableShips[i].MaxSpeed}, FirePower: {availableShips[i].FirePower}, Cost: {availableShips[i].Cost}");
+                var ship = availableShips[i];
+                Console.WriteLine($"{i + 1}. {ship.Name} - Type: {ship.Type}, Speed: {ship.MaxSpeed}, Cost: {ship.Cost}");
             }
 
             Console.WriteLine("Enter the number of the spaceship you want to buy:");
-            string input = Console.ReadLine()!;
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            string input = Console.ReadLine();
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             if (int.TryParse(input, out int choice) && choice > 0 && choice <= availableShips.Length)
             {
-                var chosenShip = availableShips[choice - 1];
-                if (player.Gold >= chosenShip.Cost)
+                var selectedShip = availableShips[choice - 1];
+                if (player.Gold >= selectedShip.Cost)
                 {
-                    player.SpaceShips.Add(chosenShip);
-                    player.Gold -= chosenShip.Cost;
-                    Console.WriteLine($"You have purchased a {chosenShip.Name}.");
+                    player.Gold -= selectedShip.Cost;
+                    player.SpaceShips.Add(selectedShip);
+                    Console.WriteLine($"You have purchased a {selectedShip.Name}.");
                 }
                 else
                 {

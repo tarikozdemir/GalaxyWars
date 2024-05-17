@@ -48,6 +48,12 @@ namespace GalaxyWars.Models
             {
                 Console.WriteLine($"{Name} has won the battle against {targetFleet.Name}!");
                 targetFleet.Destroy();
+                // Rakip filonun bulunduğu gezegeni ele geçirme
+                var targetPlanet = _game.Planets.FirstOrDefault(p => p.Position == targetFleet.CurrentLocation);
+                if (targetPlanet != null)
+                {
+                    targetPlanet.BeOccupied(Owner);
+                }
             }
             else
             {
