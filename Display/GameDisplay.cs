@@ -89,5 +89,21 @@ namespace GalaxyWars.Display
                 Console.WriteLine("No planets are currently occupied.");
             }
         }
+
+        public void DisplayPlayerFleets(Player player)
+        {
+            if (player.Fleets.Any())
+            {
+                Console.WriteLine("Your fleets:");
+                foreach (var fleet in player.Fleets)
+                {
+                    Console.WriteLine($"Fleet: {fleet.Name} - Location: ({fleet.CurrentLocation.X},{fleet.CurrentLocation.Y})");
+                }
+            }
+            else
+            {
+                Console.WriteLine("You do not have any fleets.");
+            }
+        }
     }
 }

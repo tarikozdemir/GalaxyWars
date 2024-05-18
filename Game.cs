@@ -174,18 +174,7 @@ namespace GalaxyWars
 
         public void DisplayPlayerFleets(Player player)
         {
-            if (player.Fleets.Any())
-            {
-                Console.WriteLine($"Fleets of {player.Name}:");
-                foreach (var fleet in player.Fleets)
-                {
-                    Console.WriteLine($"- {fleet.Name} at {fleet.CurrentLocation}");
-                }
-            }
-            else
-            {
-                Console.WriteLine("You do not have any fleets.");
-            }
+            _gameDisplay.DisplayPlayerFleets(player);
         }
 
         public void EndGame()
