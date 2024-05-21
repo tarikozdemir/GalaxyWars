@@ -25,8 +25,8 @@ namespace GalaxyWars.Handlers
             Console.WriteLine("6. View Your Fleets");
             Console.WriteLine("7. View Occupied Planets and Fleets");
             Console.WriteLine("8. View All Occupied Planets");
-            Console.WriteLine("0. End Turn");
-            Console.WriteLine("9. End Game"); // "End Game" seçeneği en sona taşındı
+            Console.WriteLine("9. End Turn");
+            Console.WriteLine("0. End Game"); // "End Game" seçeneği en sona taşındı
             Console.ResetColor();
         }
 
@@ -77,11 +77,11 @@ namespace GalaxyWars.Handlers
                 case "8":
                     _game.DisplayAllOccupiedPlanets();
                     break;
-                case "0":
+                case "9":
                     Console.WriteLine("Ending turn.");
                     endTurn = true;
                     break;
-                case "9":
+                case "0":
                     _game.EndGame();
                     break;
                 default:
