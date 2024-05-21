@@ -30,8 +30,10 @@ namespace GalaxyWars.Handlers
             Console.ResetColor();
         }
 
-        public void ProcessCommand(Player player, string command)
+        public bool ProcessCommand(Player player, string command)
         {
+            bool endTurn = false;
+
             switch (command)
             {
                 case "1":
@@ -44,6 +46,7 @@ namespace GalaxyWars.Handlers
                     if (player.Fleets.Any())
                     {
                         _game.MoveFleet(player);
+                        endTurn = true;
                     }
                     else
                     {
@@ -54,6 +57,7 @@ namespace GalaxyWars.Handlers
                     if (player.Fleets.Any())
                     {
                         _game.AttackSequence(player);
+                        endTurn = true;
                     }
                     else
                     {
@@ -62,6 +66,7 @@ namespace GalaxyWars.Handlers
                     break;
                 case "5":
                     _game.UpgradePlanetDefenseOption(player);
+                    endTurn = true;
                     break;
                 case "6":
                     _game.DisplayPlayerFleets(player);
@@ -74,6 +79,7 @@ namespace GalaxyWars.Handlers
                     break;
                 case "0":
                     Console.WriteLine("Ending turn.");
+                    endTurn = true;
                     break;
                 case "9":
                     _game.EndGame();
@@ -82,6 +88,7 @@ namespace GalaxyWars.Handlers
                     Console.WriteLine("Invalid command.");
                     break;
             }
+            return endTurn;
         }
 
         private void BuySpaceShip(Player player)

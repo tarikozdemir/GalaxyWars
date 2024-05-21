@@ -29,7 +29,6 @@ namespace GalaxyWars.Models
             Ships.Add(ship);
             Console.WriteLine($"{Name} fleet added a {ship.Name}.");
         }
-
         public void DisplayFleetInfo()
         {
             Console.WriteLine($"Fleet {Name} consists of {Ships.Count} ships with a minimum speed of {Speed}.");
@@ -38,7 +37,6 @@ namespace GalaxyWars.Models
                 ship.DisplaySpaceShipInfo();
             }
         }
-
         public void Attack(Fleet targetFleet)
         {
             int totalFirePower = Ships.Sum(ship => ship.FirePower);
@@ -61,7 +59,6 @@ namespace GalaxyWars.Models
                 this.Destroy();
             }
         }
-
         public void Destroy()
         {
             Console.WriteLine($"Fleet {Name} has been destroyed.");

@@ -81,17 +81,20 @@ namespace GalaxyWars
                 string command = Console.ReadLine()!;
                 if (!string.IsNullOrEmpty(command))
                 {
-                    _playerActionHandler.ProcessCommand(currentPlayer, command);
+                    bool endTurn = _playerActionHandler.ProcessCommand(currentPlayer, command);
+                    if (endTurn)
+                    {
+                        currentPlayerIndex = (currentPlayerIndex + 1) % Players.Count;
+                    }
                 }
 
                 foreach (var planet in Planets)
                 {
                     planet.ProduceResources();
                 }
-
-                currentPlayerIndex = (currentPlayerIndex + 1) % Players.Count;
             }
         }
+
 
         public void CreateFleetOption(Player player)
         {
