@@ -19,23 +19,10 @@ namespace GalaxyWars.Models
             Position = position;
             Resources = new Dictionary<string, int>
             {
-                { "Iron", 100 },
-                { "Gold", 50 }
+                { "Iron", 100 }
             };
             DefenseCapacity = 100; // Varsayılan savunma kapasitesi
             Color = ConsoleColor.Gray; // Varsayılan renk
-        }
-
-        public void AddResource(string resource, int amount)
-        {
-            if (Resources.ContainsKey(resource))
-            {
-                Resources[resource] += amount;
-            }
-            else
-            {
-                Resources.Add(resource, amount);
-            }
         }
 
         public void BeOccupied(Player player)
@@ -53,8 +40,11 @@ namespace GalaxyWars.Models
         {
             foreach (var resource in Resources)
             {
-                // Kaynak üretimi mantığı burada olacak, örneğin:
-                Resources[resource.Key] += 10;
+                // Gold hariç tüm kaynakları üret
+                if (resource.Key != "Gold")
+                {
+                    Resources[resource.Key] += 10;
+                }
             }
         }
     }

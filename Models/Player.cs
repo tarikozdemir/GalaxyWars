@@ -29,18 +29,6 @@ namespace GalaxyWars.Models
             HomeBase = homeBase;
         }
 
-        public void AddResource(string resource, int amount)
-        {
-            if (Resources.ContainsKey(resource))
-            {
-                Resources[resource] += amount;
-            }
-            else
-            {
-                Resources.Add(resource, amount);
-            }
-        }
-
         public bool CanCreateFleet()
         {
             return SpaceShips.Any(ship => !Fleets.SelectMany(f => f.Ships).Contains(ship));
