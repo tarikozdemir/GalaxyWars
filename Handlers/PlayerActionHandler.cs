@@ -78,6 +78,7 @@ namespace GalaxyWars.Handlers
                     break;
                 case "9":
                     Console.WriteLine("Ending turn.");
+                    endTurn = true;
                     break;
                 case "10":
                     _game.EndGame();

@@ -75,7 +75,7 @@ namespace GalaxyWars
             {
                 _gameDisplay.DisplayGameBoard();
                 Player currentPlayer = Players[currentPlayerIndex];
-                Console.WriteLine($"It's {currentPlayer.Name}'s turn.");
+                Console.WriteLine($"It's {currentPlayer.Name}'s turn. Your gold amount: {currentPlayer.Gold} golds.");
                 _playerActionHandler.DisplayPlayerOptions(currentPlayer);
 
                 string command = Console.ReadLine()!;
