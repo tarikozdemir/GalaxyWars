@@ -13,6 +13,13 @@ namespace GalaxyWars.Models
         public int DefenseCapacity { get; set; }
         public ConsoleColor Color { get; set; } // Gezegenin rengi
 
+        private readonly Dictionary<string, int> _resourceRates = new()
+        {
+            { "Iron", 10 },
+            { "Gold", 5 },
+            // Add more resources
+        };
+
         public Planet(string name, Point position)
         {
             Name = name;
@@ -38,13 +45,11 @@ namespace GalaxyWars.Models
 
         public void ProduceResources()
         {
-            foreach (var resource in Resources)
+            foreach (var rate in _resourceRates)
             {
-                // Gold hariç tüm kaynakları üret
-                if (resource.Key != "Gold")
-                {
-                    Resources[resource.Key] += 10;
-                }
+                if (!Resources.ContainsKey(rate.Key))
+                    Resources[rate.Key] = 0;
+                Resources[rate.Key] += rate.Value;
             }
         }
     }

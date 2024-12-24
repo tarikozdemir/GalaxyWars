@@ -21,7 +21,16 @@ namespace GalaxyWars
         private GameDisplay _gameDisplay;
         private PlayerSetup _playerSetup;
         private PlanetSetup _planetSetup;
-        private bool _gameRunning;
+
+        public enum GameState
+        {
+            Setup,
+            Running,
+            Paused,
+            Ended
+        }
+
+        private GameState _currentState;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         public Game()
@@ -62,7 +71,7 @@ namespace GalaxyWars
 
         public void StartGameLoop()
         {
-            _gameRunning = true;
+            _currentState = GameState.Running;
             int currentPlayerIndex = 0;
 
             if (Players.Count == 0)
@@ -71,7 +80,7 @@ namespace GalaxyWars
                 return;
             }
 
-            while (_gameRunning)
+            while (_currentState == GameState.Running)
             {
                 _gameDisplay.DisplayGameBoard();
                 Player currentPlayer = Players[currentPlayerIndex];
@@ -92,6 +101,8 @@ namespace GalaxyWars
                 {
                     planet.ProduceResources();
                 }
+
+                CheckVictoryConditions();
             }
         }
 
@@ -182,8 +193,19 @@ namespace GalaxyWars
 
         public void EndGame()
         {
-            _gameRunning = false;
+            _currentState = GameState.Ended;
             Console.WriteLine("Game has ended.");
+        }
+
+        private void CheckVictoryConditions()
+        {
+            var activePlayers = Players.Where(p => p.IsAlive).ToList();
+            if (activePlayers.Count == 1)
+            {
+                var winner = activePlayers.First();
+                Console.WriteLine($"Game Over! {winner.Name} has won!");
+                EndGame();
+            }
         }
     }
 }
