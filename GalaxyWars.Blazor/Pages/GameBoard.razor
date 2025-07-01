@@ -4,6 +4,411 @@
 @using GalaxyWars.Core
 @using System.Drawing
 
+<div class="space-panel">
+    <h3>Oyun Tahtası</h3>
+    @if (!gameStarted)
+    {
+        <div>
+            <label>Genişlik: <input type="number" @bind="width" min="2" max="20" /></label>
+            <label>Yükseklik: <input type="number" @bind="height" min="2" max="20" /></label>
+        </div>
+        <div style="margin-top:10px;">
+            <input placeholder="Oyuncu adı" @bind="newPlayerName" />
+            <button @onclick="AddPlayer">Oyuncu Ekle</button>
+        </div>
+        <ul>
+            @foreach (var name in playerNames)
+            {
+                <li>@name</li>
+            }
+        </ul>
+        <button class="btn neon-btn" @onclick="StartGame" disabled="@(playerNames.Count == 0)">Oyun Başlat</button>
+    }
+    else if (gameStarted && board != null && CurrentPlayer != null)
+    {
+        <div class="game-flex-row">
+            <div class="game-main-area">
+                <table class="game-board-table">
+                    @for (int y = 0; y < height; y++)
+                    {
+                        <tr>
+                            @for (int x = 0; x < width; x++)
+                            {
+                                var cell = board.GetCell(x, y);
+                                bool isSelected = selectedCell?.x == x && selectedCell?.y == y;
+                                bool isMoveFrom = moveFrom != null && moveFrom.Value.x == x && moveFrom.Value.y == y;
+                                bool isMoveTo = moveTo != null && moveTo.Value.x == x && moveTo.Value.y == y;
+                                var cellClass = isSelected ? "selected" : isMoveFrom ? "move-from" : isMoveTo ? "move-to" : "";
+                                <td class="@cellClass" style="background:@(cell.OccupiedByPlayer != null ? cell.OccupiedByPlayer.Color : "white"); color:@(cell.OccupiedByPlayer != null ? "white" : "#222");" @onclick="() => SelectCell(x, y)">
+                                    @if (cell.OccupiedByPlayer != null)
+                                    {
+                                        @(cell.OccupiedByPlayer.Name.Substring(0,1).ToUpper())
+                                    }
+                                    else if (cell.OccupiedByPlanet != null)
+                                    {
+                                        @("@")
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                </table>
+                @if (selectedCell != null)
+                {
+                    <div style="margin-top:10px;">
+                        <b>Seçili Hücre:</b> (@selectedCell?.x, @selectedCell?.y)
+                    </div>
+                }
+                <div style="margin-bottom:10px;">
+                    <b>Sıra:</b> @CurrentPlayer.Name
+                    <span style="margin-left:10px;">Altın: @CurrentPlayer.Gold</span>
+                </div>
+                <div class="action-buttons">
+                    <button @onclick="ShowBuyShipPanel">Uzay Gemisi Satın Al</button>
+                    <button @onclick="ShowCreateFleetPanel">Filo Oluştur</button>
+                    <button @onclick="ShowMoveFleetPanel">Filo Taşı</button>
+                    <button @onclick="ShowAttackPanel">Saldırı</button>
+                    <button @onclick="ShowUpgradeDefensePanel">Gezegen Savunmasını Yükselt</button>
+                    <button @onclick="ShowFleetsPanel">Filolarımı Görüntüle</button>
+                    <button @onclick="ShowAllOccupiedPlanetsPanel">Tüm İşgal Edilmiş Gezegenler</button>
+                    <button @onclick="ShowResourcesPanel">Kaynaklarım</button>
+                    <button @onclick="NextPlayer">Sıradaki Oyuncuya Geç</button>
+                </div>
+                @if (showBuyShipPanel)
+                {
+                    <div class="glass-panel">
+                        <h4 class="panel-title">Uzay Gemisi Satın Al</h4>
+                        <table style="width:100%; font-size:0.95rem;">
+                            <tr><th>İsim</th><th>Tip</th><th>Hız</th><th>Güç</th><th>Kalkan</th><th>Fiyat</th><th></th></tr>
+                            @foreach (var ship in availableShips)
+                            {
+                                <tr style="background:@(selectedShipToBuy == ship ? "#e3f2fd" : "transparent");">
+                                    <td>@ship.Name</td>
+                                    <td>@ship.Type</td>
+                                    <td>@ship.MaxSpeed</td>
+                                    <td>@ship.FirePower</td>
+                                    <td>@ship.ShieldStrength</td>
+                                    <td>@ship.Cost</td>
+                                    <td><button @onclick="() => SelectShipToBuy(ship)">Seç</button></td>
+                                </tr>
+                            }
+                        </table>
+                        @if (selectedShipToBuy != null)
+                        {
+                            <div style="margin-top:10px;">
+                                <button @onclick="BuySelectedShip">Satın Al</button>
+                            </div>
+                        }
+                        <div style="margin-top:10px; color:#d32f2f;">@buyShipMessage</div>
+                        <button @onclick="HideBuyShipPanel" style="margin-top:10px;">Kapat</button>
+                    </div>
+                }
+                @if (showCreateFleetPanel)
+                {
+                    <div class="glass-panel">
+                        <h4 class="panel-title">Filo Oluştur</h4>
+                        <input placeholder="Filo ismi" @bind="newFleetName" style="margin-bottom:10px;" />
+                        <table style="width:100%; font-size:0.95rem;">
+                            <tr><th>Seç</th><th>İsim</th><th>Tip</th><th>Hız</th><th>Güç</th><th>Kalkan</th></tr>
+                            @foreach (var ship in shipsForFleet)
+                            {
+                                <tr>
+                                    <td><input type="checkbox" checked="@selectedShipsForFleet.Contains(ship)" @onchange="_ => ToggleShipForFleet(ship)" /></td>
+                                    <td>@ship.Name</td>
+                                    <td>@ship.Type</td>
+                                    <td>@ship.MaxSpeed</td>
+                                    <td>@ship.FirePower</td>
+                                    <td>@ship.ShieldStrength</td>
+                                </tr>
+                            }
+                        </table>
+                        <button @onclick="CreateFleet" style="margin-top:10px;">Filo Oluştur</button>
+                        <div style="margin-top:10px; color:#d32f2f;">@createFleetMessage</div>
+                        <button @onclick="HideCreateFleetPanel" style="margin-top:10px;">Kapat</button>
+                    </div>
+                }
+                @if (showMoveFleetPanel)
+                {
+                    <div class="glass-panel">
+                        <h4 class="panel-title">Filo Taşı</h4>
+                        <div>
+                            <b>Filolar:</b>
+                            <ul>
+                            @foreach (var fleet in CurrentPlayer.Fleets)
+                            {
+                                <li>
+                                    <button @onclick="() => SelectFleetToMove(fleet)" style="margin-right:10px;">Seç</button>
+                                    <span class="fleet-emoji">🚀</span>@fleet.Name (Konum: @fleet.CurrentLocation.X,@fleet.CurrentLocation.Y)
+                                </li>
+                            }
+                            </ul>
+                        </div>
+                        @if (selectedFleetToMove != null)
+                        {
+                            <div style="margin-top:10px;">
+                                <b>Hedef Hücreyi Seç:</b>
+                                <div style="margin-top:5px;">Tahta üstünde bir hücreye tıkla.</div>
+                            </div>
+                        }
+                        @if (selectedFleetToMove != null && selectedFleetTarget != null)
+                        {
+                            <div style="margin-top:10px;">
+                                <button @onclick="MoveSelectedFleet">Taşı</button>
+                            </div>
+                        }
+                        <div style="margin-top:10px; color:#d32f2f;">@moveFleetMessage</div>
+                        <button @onclick="HideMoveFleetPanel" style="margin-top:10px;">Kapat</button>
+                    </div>
+                }
+                @if (showAttackPanel)
+                {
+                    <div class="glass-panel">
+                        <h4 class="panel-title">Saldırı</h4>
+                        <div>
+                            <b>Filolar:</b>
+                            <ul>
+                            @foreach (var fleet in CurrentPlayer.Fleets)
+                            {
+                                <li>
+                                    <button @onclick="() => SelectFleetToAttack(fleet)" style="margin-right:10px;">Seç</button>
+                                    <span class="fleet-emoji">🚀</span>@fleet.Name (Konum: @fleet.CurrentLocation.X,@fleet.CurrentLocation.Y)
+                                </li>
+                            }
+                            </ul>
+                        </div>
+                        @if (selectedFleetToAttack != null)
+                        {
+                            <div style="margin-top:10px;">
+                                <b>Hedef Hücreyi Seç:</b>
+                                <div style="margin-top:5px;">Tahta üstünde bir hücreye tıkla.</div>
+                            </div>
+                        }
+                        @if (selectedFleetToAttack != null && selectedAttackTarget != null)
+                        {
+                            <div style="margin-top:10px;">
+                                <button @onclick="AttackWithSelectedFleet">Saldır</button>
+                            </div>
+                        }
+                        <div style="margin-top:10px; color:#d32f2f;">@attackMessage</div>
+                        <button @onclick="HideAttackPanel" style="margin-top:10px;">Kapat</button>
+                    </div>
+                }
+                @if (showUpgradeDefensePanel)
+                {
+                    <div class="glass-panel">
+                        <h4 class="panel-title">Gezegen Savunmasını Yükselt</h4>
+                        <div>
+                            <b>Gezegenler:</b>
+                            <ul>
+                            @foreach (var planet in GetCurrentPlayerPlanets())
+                            {
+                                <li>
+                                    <button @onclick="() => selectedPlanetToUpgrade = planet" style="margin-right:10px;">Seç</button>
+                                    <span class="planet-emoji">🪐</span>@planet.Name (Savunma: @planet.DefenseCapacity)
+                                </li>
+                            }
+                            </ul>
+                        </div>
+                        @if (selectedPlanetToUpgrade != null)
+                        {
+                            <div style="margin-top:10px;">
+                                <input type="number" min="1" @bind="defenseUpgradeAmount" placeholder="Artış miktarı" />
+                                <button @onclick="UpgradeSelectedPlanetDefense" style="margin-left:10px;">Yükselt</button>
+                            </div>
+                        }
+                        <div style="margin-top:10px; color:#d32f2f;">@upgradeDefenseMessage</div>
+                        <button @onclick="HideUpgradeDefensePanel" style="margin-top:10px;">Kapat</button>
+                    </div>
+                }
+                @if (showFleetsPanel)
+                {
+                    <div class="glass-panel">
+                        <h4 class="panel-title">Filolarım</h4>
+                        @if (CurrentPlayer.Fleets.Count == 0)
+                        {
+                            <div>Hiç filonuz yok.</div>
+                        }
+                        else
+                        {
+                            <ul>
+                            @foreach (var fleet in CurrentPlayer.Fleets)
+                            {
+                                <li style="margin-bottom:10px;">
+                                    <b>@fleet.Name</b> (Konum: @fleet.CurrentLocation.X,@fleet.CurrentLocation.Y)
+                                    <ul>
+                                    @foreach (var ship in fleet.Ships)
+                                    {
+                                        <li>@ship.Name - Tip: @ship.Type, Güç: @ship.FirePower, Kalkan: @ship.ShieldStrength</li>
+                                    }
+                                    </ul>
+                                </li>
+                            }
+                            </ul>
+                        }
+                        <button @onclick="HideFleetsPanel" style="margin-top:10px;">Kapat</button>
+                    </div>
+                }
+                @if (showOccupiedPlanetsPanel)
+                {
+                    <div class="glass-panel">
+                        <h4 class="panel-title">İşgal Ettiğim Gezegenler ve Filolar</h4>
+                        @if (GetCurrentPlayerOccupiedPlanetsAndFleets().Count == 0)
+                        {
+                            <div>Hiç işgal ettiğiniz gezegen yok.</div>
+                        }
+                        else
+                        {
+                            <ul>
+                            @foreach (var (planet, fleets) in GetCurrentPlayerOccupiedPlanetsAndFleets())
+                            {
+                                <li style="margin-bottom:10px;">
+                                    <b>@planet.Name</b> (Savunma: @planet.DefenseCapacity)
+                                    <ul>
+                                    @foreach (var fleet in fleets)
+                                    {
+                                        <li>@fleet.Name (Gemiler: @fleet.Ships.Count)</li>
+                                    }
+                                    </ul>
+                                </li>
+                            }
+                            </ul>
+                        }
+                        <button @onclick="HideOccupiedPlanetsPanel" style="margin-top:10px;">Kapat</button>
+                    </div>
+                }
+                @if (showAllOccupiedPlanetsPanel)
+                {
+                    <div class="glass-panel">
+                        <h4 class="panel-title">Tüm İşgal Edilmiş Gezegenler</h4>
+                        @if (GetAllOccupiedPlanets().Count == 0)
+                        {
+                            <div>Hiç işgal edilmiş gezegen yok.</div>
+                        }
+                        else
+                        {
+                            <ul>
+                            @foreach (var (planet, owner) in GetAllOccupiedPlanets())
+                            {
+                                <li><b>@planet.Name</b> (Savunma: @planet.DefenseCapacity) - Sahibi: @owner.Name</li>
+                            }
+                            </ul>
+                        }
+                        <button @onclick="HideAllOccupiedPlanetsPanel" style="margin-top:10px;">Kapat</button>
+                    </div>
+                }
+                @if (showResourcesPanel)
+                {
+                    <div class="glass-panel">
+                        <h4 class="panel-title">Kaynaklarım</h4>
+                        <b>Toplam:</b>
+                        <ul>
+                        @foreach (var kvp in GetPlayerTotalResources(CurrentPlayer))
+                        {
+                            <li>@kvp.Key: @kvp.Value</li>
+                        }
+                        </ul>
+                        <b>Gezegen Bazında:</b>
+                        <ul>
+                        @foreach (var planet in GetCurrentPlayerPlanets())
+                        {
+                            <li><b>@planet.Name</b>:
+                                <ul>
+                                @foreach (var kvp in planet.Resources)
+                                {
+                                    <li>@kvp.Key: @kvp.Value</li>
+                                }
+                                </ul>
+                            </li>
+                        }
+                        </ul>
+                        <button @onclick="HideResourcesPanel" style="margin-top:10px;">Kapat</button>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(moveMessage))
+                {
+                    <div style="margin-bottom:10px; color: #0074d9;">@moveMessage</div>
+                }
+                @if (moveFrom != null && moveTo != null)
+                {
+                    <button @onclick="MovePlayer" style="margin-bottom:10px;">Taşı</button>
+                }
+            </div>
+            <div class="side-info-panel">
+                <h4>Filolarım</h4>
+                @if (CurrentPlayer.Fleets.Count == 0)
+                {
+                    <div>Hiç filonuz yok.</div>
+                }
+                else
+                {
+                    <ul>
+                    @foreach (var fleet in CurrentPlayer.Fleets)
+                    {
+                        <li style="margin-bottom:8px;">
+                            <b>@fleet.Name</b> (Konum: @fleet.CurrentLocation.X,@fleet.CurrentLocation.Y)
+                            <ul>
+                            @foreach (var ship in fleet.Ships)
+                            {
+                                <li>@ship.Name - Tip: @ship.Type, Güç: @ship.FirePower, Kalkan: @ship.ShieldStrength</li>
+                            }
+                            </ul>
+                        </li>
+                    }
+                    </ul>
+                }
+                <h4>Kaynaklarım</h4>
+                <b>Toplam:</b>
+                <ul>
+                @foreach (var kvp in GetPlayerTotalResources(CurrentPlayer))
+                {
+                    <li>@kvp.Key: @kvp.Value</li>
+                }
+                </ul>
+                <b>Gezegen Bazında:</b>
+                <ul>
+                @foreach (var planet in GetCurrentPlayerPlanets())
+                {
+                    <li><b>@planet.Name</b>:
+                        <ul>
+                        @foreach (var kvp in planet.Resources)
+                        {
+                            <li>@kvp.Key: @kvp.Value</li>
+                        }
+                        </ul>
+                    </li>
+                }
+                </ul>
+                <h4>İşgal Ettiğim Gezegenler ve Filolar</h4>
+                @if (GetCurrentPlayerOccupiedPlanetsAndFleets().Count == 0)
+                {
+                    <div>Hiç işgal ettiğiniz gezegen yok.</div>
+                }
+                else
+                {
+                    <ul>
+                    @foreach (var (planet, fleets) in GetCurrentPlayerOccupiedPlanetsAndFleets())
+                    {
+                        <li style="margin-bottom:10px;">
+                            <b>@planet.Name</b> (Savunma: @planet.DefenseCapacity)
+                            <ul>
+                            @foreach (var fleet in fleets)
+                            {
+                                <li>@fleet.Name (Gemiler: @fleet.Ships.Count)</li>
+                            }
+                            </ul>
+                        </li>
+                    }
+                    </ul>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <p>Tahta yükleniyor...</p>
+    }
+</div>
+
 @code {
     private GalaxyWars.GameBoard? board;
     private int width = 8;
@@ -518,337 +923,34 @@
     .game-board-table .move-to {
         background: #b9f6ca !important;
     }
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 24px 0 rgba(0,0,0,0.10);
+    }
+    .panel-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+    .planet-emoji {
+        font-size: 1.2rem;
+        margin-right: 5px;
+    }
+    .fleet-emoji {
+        font-size: 1.2rem;
+        margin-right: 5px;
+    }
+    .emoji {
+        font-size: 1.2rem;
+        margin-right: 5px;
+    }
+    .side-info-panel {
+        flex: 0 0 300px;
+        padding: 20px;
+        background: #f8fafc;
+        border-radius: 10px;
+        margin-left: 20px;
+    }
 </style>
-
-<h3>Oyun Tahtası</h3>
-@if (!gameStarted)
-{
-    <div>
-        <label>Genişlik: <input type="number" @bind="width" min="2" max="20" /></label>
-        <label>Yükseklik: <input type="number" @bind="height" min="2" max="20" /></label>
-    </div>
-    <div style="margin-top:10px;">
-        <input placeholder="Oyuncu adı" @bind="newPlayerName" />
-        <button @onclick="AddPlayer">Oyuncu Ekle</button>
-    </div>
-    <ul>
-        @foreach (var name in playerNames)
-        {
-            <li>@name</li>
-        }
-    </ul>
-    <button @onclick="StartGame" disabled="@(playerNames.Count == 0)">Oyun Başlat</button>
-}
-else if (board != null)
-{
-    <table class="game-board-table">
-        @for (int y = 0; y < height; y++)
-        {
-            <tr>
-                @for (int x = 0; x < width; x++)
-                {
-                    var cell = board.GetCell(x, y);
-                    bool isSelected = selectedCell?.x == x && selectedCell?.y == y;
-                    bool isMoveFrom = moveFrom != null && moveFrom.Value.x == x && moveFrom.Value.y == y;
-                    bool isMoveTo = moveTo != null && moveTo.Value.x == x && moveTo.Value.y == y;
-                    var cellClass = isSelected ? "selected" : isMoveFrom ? "move-from" : isMoveTo ? "move-to" : "";
-                    <td class="@cellClass" style="background:@(cell.OccupiedByPlayer != null ? cell.OccupiedByPlayer.Color : "white"); color:@(cell.OccupiedByPlayer != null ? "white" : "#222");" @onclick="() => SelectCell(x, y)">
-                        @if (cell.OccupiedByPlayer != null)
-                        {
-                            @(cell.OccupiedByPlayer.Name.Substring(0,1).ToUpper())
-                        }
-                        else if (cell.OccupiedByPlanet != null)
-                        {
-                            @("@")
-                        }
-                    </td>
-                }
-            </tr>
-        }
-    </table>
-    @if (selectedCell != null)
-    {
-        <div style="margin-top:10px;">
-            <b>Seçili Hücre:</b> (@selectedCell?.x, @selectedCell?.y)
-        </div>
-    }
-    @if (CurrentPlayer != null)
-    {
-        <div style="margin-bottom:10px;">
-            <b>Sıra:</b> @CurrentPlayer.Name
-            <span style="margin-left:10px;">Altın: @CurrentPlayer.Gold</span>
-            <button @onclick="ShowBuyShipPanel" style="margin-left:10px;">Uzay Gemisi Satın Al</button>
-            <button @onclick="ShowCreateFleetPanel" style="margin-left:10px;">Filo Oluştur</button>
-            <button @onclick="ShowMoveFleetPanel" style="margin-left:10px;">Filo Taşı</button>
-            <button @onclick="ShowAttackPanel" style="margin-left:10px;">Saldırı</button>
-            <button @onclick="ShowUpgradeDefensePanel" style="margin-left:10px;">Gezegen Savunmasını Yükselt</button>
-            <button @onclick="ShowFleetsPanel" style="margin-left:10px;">Filolarımı Görüntüle</button>
-            <button @onclick="ShowOccupiedPlanetsPanel" style="margin-left:10px;">İşgal Ettiğim Gezegenler</button>
-            <button @onclick="ShowAllOccupiedPlanetsPanel" style="margin-left:10px;">Tüm İşgal Edilmiş Gezegenler</button>
-            <button @onclick="ShowResourcesPanel" style="margin-left:10px;">Kaynaklarım</button>
-            <button @onclick="NextPlayer" style="margin-left:10px;">Sıradaki Oyuncuya Geç</button>
-        </div>
-        @if (showBuyShipPanel)
-        {
-            <div style="background:#fff; border:1px solid #ccc; border-radius:8px; padding:20px; max-width:500px; margin-bottom:20px;">
-                <h4>Uzay Gemisi Satın Al</h4>
-                <table style="width:100%; font-size:0.95rem;">
-                    <tr><th>İsim</th><th>Tip</th><th>Hız</th><th>Güç</th><th>Kalkan</th><th>Fiyat</th><th></th></tr>
-                    @foreach (var ship in availableShips)
-                    {
-                        <tr style="background:@(selectedShipToBuy == ship ? "#e3f2fd" : "transparent");">
-                            <td>@ship.Name</td>
-                            <td>@ship.Type</td>
-                            <td>@ship.MaxSpeed</td>
-                            <td>@ship.FirePower</td>
-                            <td>@ship.ShieldStrength</td>
-                            <td>@ship.Cost</td>
-                            <td><button @onclick="() => SelectShipToBuy(ship)">Seç</button></td>
-                        </tr>
-                    }
-                </table>
-                @if (selectedShipToBuy != null)
-                {
-                    <div style="margin-top:10px;">
-                        <button @onclick="BuySelectedShip">Satın Al</button>
-                    </div>
-                }
-                <div style="margin-top:10px; color:#d32f2f;">@buyShipMessage</div>
-                <button @onclick="HideBuyShipPanel" style="margin-top:10px;">Kapat</button>
-            </div>
-        }
-        @if (showCreateFleetPanel)
-        {
-            <div style="background:#fff; border:1px solid #ccc; border-radius:8px; padding:20px; max-width:500px; margin-bottom:20px;">
-                <h4>Filo Oluştur</h4>
-                <input placeholder="Filo ismi" @bind="newFleetName" style="margin-bottom:10px;" />
-                <table style="width:100%; font-size:0.95rem;">
-                    <tr><th>Seç</th><th>İsim</th><th>Tip</th><th>Hız</th><th>Güç</th><th>Kalkan</th></tr>
-                    @foreach (var ship in shipsForFleet)
-                    {
-                        <tr>
-                            <td><input type="checkbox" checked="@selectedShipsForFleet.Contains(ship)" @onchange="_ => ToggleShipForFleet(ship)" /></td>
-                            <td>@ship.Name</td>
-                            <td>@ship.Type</td>
-                            <td>@ship.MaxSpeed</td>
-                            <td>@ship.FirePower</td>
-                            <td>@ship.ShieldStrength</td>
-                        </tr>
-                    }
-                </table>
-                <button @onclick="CreateFleet" style="margin-top:10px;">Filo Oluştur</button>
-                <div style="margin-top:10px; color:#d32f2f;">@createFleetMessage</div>
-                <button @onclick="HideCreateFleetPanel" style="margin-top:10px;">Kapat</button>
-            </div>
-        }
-        @if (showMoveFleetPanel)
-        {
-            <div style="background:#fff; border:1px solid #ccc; border-radius:8px; padding:20px; max-width:500px; margin-bottom:20px;">
-                <h4>Filo Taşı</h4>
-                <div>
-                    <b>Filolar:</b>
-                    <ul>
-                    @foreach (var fleet in CurrentPlayer.Fleets)
-                    {
-                        <li>
-                            <button @onclick="() => SelectFleetToMove(fleet)" style="margin-right:10px;">Seç</button>
-                            @fleet.Name (Konum: @fleet.CurrentLocation.X,@fleet.CurrentLocation.Y)
-                        </li>
-                    }
-                    </ul>
-                </div>
-                @if (selectedFleetToMove != null)
-                {
-                    <div style="margin-top:10px;">
-                        <b>Hedef Hücreyi Seç:</b>
-                        <div style="margin-top:5px;">Tahta üstünde bir hücreye tıkla.</div>
-                    </div>
-                }
-                @if (selectedFleetToMove != null && selectedFleetTarget != null)
-                {
-                    <div style="margin-top:10px;">
-                        <button @onclick="MoveSelectedFleet">Taşı</button>
-                    </div>
-                }
-                <div style="margin-top:10px; color:#d32f2f;">@moveFleetMessage</div>
-                <button @onclick="HideMoveFleetPanel" style="margin-top:10px;">Kapat</button>
-            </div>
-        }
-        @if (showAttackPanel)
-        {
-            <div style="background:#fff; border:1px solid #ccc; border-radius:8px; padding:20px; max-width:500px; margin-bottom:20px;">
-                <h4>Saldırı</h4>
-                <div>
-                    <b>Filolar:</b>
-                    <ul>
-                    @foreach (var fleet in CurrentPlayer.Fleets)
-                    {
-                        <li>
-                            <button @onclick="() => SelectFleetToAttack(fleet)" style="margin-right:10px;">Seç</button>
-                            @fleet.Name (Konum: @fleet.CurrentLocation.X,@fleet.CurrentLocation.Y)
-                        </li>
-                    }
-                    </ul>
-                </div>
-                @if (selectedFleetToAttack != null)
-                {
-                    <div style="margin-top:10px;">
-                        <b>Hedef Hücreyi Seç:</b>
-                        <div style="margin-top:5px;">Tahta üstünde bir hücreye tıkla.</div>
-                    </div>
-                }
-                @if (selectedFleetToAttack != null && selectedAttackTarget != null)
-                {
-                    <div style="margin-top:10px;">
-                        <button @onclick="AttackWithSelectedFleet">Saldır</button>
-                    </div>
-                }
-                <div style="margin-top:10px; color:#d32f2f;">@attackMessage</div>
-                <button @onclick="HideAttackPanel" style="margin-top:10px;">Kapat</button>
-            </div>
-        }
-        @if (showUpgradeDefensePanel)
-        {
-            <div style="background:#fff; border:1px solid #ccc; border-radius:8px; padding:20px; max-width:500px; margin-bottom:20px;">
-                <h4>Gezegen Savunmasını Yükselt</h4>
-                <div>
-                    <b>Gezegenler:</b>
-                    <ul>
-                    @foreach (var planet in GetCurrentPlayerPlanets())
-                    {
-                        <li>
-                            <button @onclick="() => selectedPlanetToUpgrade = planet" style="margin-right:10px;">Seç</button>
-                            @planet.Name (Savunma: @planet.DefenseCapacity)
-                        </li>
-                    }
-                    </ul>
-                </div>
-                @if (selectedPlanetToUpgrade != null)
-                {
-                    <div style="margin-top:10px;">
-                        <input type="number" min="1" @bind="defenseUpgradeAmount" placeholder="Artış miktarı" />
-                        <button @onclick="UpgradeSelectedPlanetDefense" style="margin-left:10px;">Yükselt</button>
-                    </div>
-                }
-                <div style="margin-top:10px; color:#d32f2f;">@upgradeDefenseMessage</div>
-                <button @onclick="HideUpgradeDefensePanel" style="margin-top:10px;">Kapat</button>
-            </div>
-        }
-        @if (showFleetsPanel)
-        {
-            <div style="background:#fff; border:1px solid #ccc; border-radius:8px; padding:20px; max-width:600px; margin-bottom:20px;">
-                <h4>Filolarım</h4>
-                @if (CurrentPlayer.Fleets.Count == 0)
-                {
-                    <div>Hiç filonuz yok.</div>
-                }
-                else
-                {
-                    <ul>
-                    @foreach (var fleet in CurrentPlayer.Fleets)
-                    {
-                        <li style="margin-bottom:10px;">
-                            <b>@fleet.Name</b> (Konum: @fleet.CurrentLocation.X,@fleet.CurrentLocation.Y)
-                            <ul>
-                            @foreach (var ship in fleet.Ships)
-                            {
-                                <li>@ship.Name - Tip: @ship.Type, Güç: @ship.FirePower, Kalkan: @ship.ShieldStrength</li>
-                            }
-                            </ul>
-                        </li>
-                    }
-                    </ul>
-                }
-                <button @onclick="HideFleetsPanel" style="margin-top:10px;">Kapat</button>
-            </div>
-        }
-        @if (showOccupiedPlanetsPanel)
-        {
-            <div style="background:#fff; border:1px solid #ccc; border-radius:8px; padding:20px; max-width:600px; margin-bottom:20px;">
-                <h4>İşgal Ettiğim Gezegenler ve Filolar</h4>
-                @if (GetCurrentPlayerOccupiedPlanetsAndFleets().Count == 0)
-                {
-                    <div>Hiç işgal ettiğiniz gezegen yok.</div>
-                }
-                else
-                {
-                    <ul>
-                    @foreach (var (planet, fleets) in GetCurrentPlayerOccupiedPlanetsAndFleets())
-                    {
-                        <li style="margin-bottom:10px;">
-                            <b>@planet.Name</b> (Savunma: @planet.DefenseCapacity)
-                            <ul>
-                            @foreach (var fleet in fleets)
-                            {
-                                <li>@fleet.Name (Gemiler: @fleet.Ships.Count)</li>
-                            }
-                            </ul>
-                        </li>
-                    }
-                    </ul>
-                }
-                <button @onclick="HideOccupiedPlanetsPanel" style="margin-top:10px;">Kapat</button>
-            </div>
-        }
-        @if (showAllOccupiedPlanetsPanel)
-        {
-            <div style="background:#fff; border:1px solid #ccc; border-radius:8px; padding:20px; max-width:600px; margin-bottom:20px;">
-                <h4>Tüm İşgal Edilmiş Gezegenler</h4>
-                @if (GetAllOccupiedPlanets().Count == 0)
-                {
-                    <div>Hiç işgal edilmiş gezegen yok.</div>
-                }
-                else
-                {
-                    <ul>
-                    @foreach (var (planet, owner) in GetAllOccupiedPlanets())
-                    {
-                        <li><b>@planet.Name</b> (Savunma: @planet.DefenseCapacity) - Sahibi: @owner.Name</li>
-                    }
-                    </ul>
-                }
-                <button @onclick="HideAllOccupiedPlanetsPanel" style="margin-top:10px;">Kapat</button>
-            </div>
-        }
-        @if (showResourcesPanel)
-        {
-            <div style="background:#fff; border:1px solid #ccc; border-radius:8px; padding:20px; max-width:600px; margin-bottom:20px;">
-                <h4>Kaynaklarım</h4>
-                <b>Toplam:</b>
-                <ul>
-                @foreach (var kvp in GetPlayerTotalResources(CurrentPlayer))
-                {
-                    <li>@kvp.Key: @kvp.Value</li>
-                }
-                </ul>
-                <b>Gezegen Bazında:</b>
-                <ul>
-                @foreach (var planet in GetCurrentPlayerPlanets())
-                {
-                    <li><b>@planet.Name</b>:
-                        <ul>
-                        @foreach (var kvp in planet.Resources)
-                        {
-                            <li>@kvp.Key: @kvp.Value</li>
-                        }
-                        </ul>
-                    </li>
-                }
-                </ul>
-                <button @onclick="HideResourcesPanel" style="margin-top:10px;">Kapat</button>
-            </div>
-        }
-        @if (!string.IsNullOrEmpty(moveMessage))
-        {
-            <div style="margin-bottom:10px; color: #0074d9;">@moveMessage</div>
-        }
-        @if (moveFrom != null && moveTo != null)
-        {
-            <button @onclick="MovePlayer" style="margin-bottom:10px;">Taşı</button>
-        }
-    }
-}
-else
-{
-    <p>Tahta yükleniyor...</p>
-}
