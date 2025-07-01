@@ -39,14 +39,18 @@
                                 bool isMoveFrom = moveFrom != null && moveFrom.Value.x == x && moveFrom.Value.y == y;
                                 bool isMoveTo = moveTo != null && moveTo.Value.x == x && moveTo.Value.y == y;
                                 var cellClass = isSelected ? "selected" : isMoveFrom ? "move-from" : isMoveTo ? "move-to" : "";
-                                <td class="@cellClass" style="background:@(cell.OccupiedByPlayer != null ? cell.OccupiedByPlayer.Color : "white"); color:@(cell.OccupiedByPlayer != null ? "white" : "#222");" @onclick="() => SelectCell(x, y)">
+                                <td class="@cellClass" style="background:@(cell.OccupiedByPlayer != null ? cell.OccupiedByPlayer.Color : ""); color:@(cell.OccupiedByPlayer != null ? "white" : "#e0e6f0");" @onclick="() => SelectCell(x, y)">
                                     @if (cell.OccupiedByPlayer != null)
                                     {
-                                        @(cell.OccupiedByPlayer.Name.Substring(0,1).ToUpper())
+                                        <span class="fleet-emoji">🚀</span>
                                     }
                                     else if (cell.OccupiedByPlanet != null)
                                     {
-                                        @("@")
+                                        <span class="planet-emoji">🪐</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="space-star-emoji">✨</span>
                                     }
                                 </td>
                             }
@@ -333,73 +337,75 @@
                     <button @onclick="MovePlayer" style="margin-bottom:10px;">Taşı</button>
                 }
             </div>
-            <div class="side-info-panel">
-                <h4>Filolarım</h4>
-                @if (CurrentPlayer.Fleets.Count == 0)
-                {
-                    <div>Hiç filonuz yok.</div>
-                }
-                else
-                {
-                    <ul>
-                    @foreach (var fleet in CurrentPlayer.Fleets)
+            <div class="game-side-column">
+                <div class="side-info-panel">
+                    <h4>Filolarım</h4>
+                    @if (CurrentPlayer.Fleets.Count == 0)
                     {
-                        <li style="margin-bottom:8px;">
-                            <b>@fleet.Name</b> (Konum: @fleet.CurrentLocation.X,@fleet.CurrentLocation.Y)
-                            <ul>
-                            @foreach (var ship in fleet.Ships)
-                            {
-                                <li>@ship.Name - Tip: @ship.Type, Güç: @ship.FirePower, Kalkan: @ship.ShieldStrength</li>
-                            }
-                            </ul>
-                        </li>
+                        <div>Hiç filonuz yok.</div>
                     }
-                    </ul>
-                }
-                <h4>Kaynaklarım</h4>
-                <b>Toplam:</b>
-                <ul>
-                @foreach (var kvp in GetPlayerTotalResources(CurrentPlayer))
-                {
-                    <li>@kvp.Key: @kvp.Value</li>
-                }
-                </ul>
-                <b>Gezegen Bazında:</b>
-                <ul>
-                @foreach (var planet in GetCurrentPlayerPlanets())
-                {
-                    <li><b>@planet.Name</b>:
+                    else
+                    {
                         <ul>
-                        @foreach (var kvp in planet.Resources)
+                        @foreach (var fleet in CurrentPlayer.Fleets)
                         {
-                            <li>@kvp.Key: @kvp.Value</li>
+                            <li style="margin-bottom:8px;">
+                                <b>@fleet.Name</b> (Konum: @fleet.CurrentLocation.X,@fleet.CurrentLocation.Y)
+                                <ul>
+                                @foreach (var ship in fleet.Ships)
+                                {
+                                    <li>@ship.Name - Tip: @ship.Type, Güç: @ship.FirePower, Kalkan: @ship.ShieldStrength</li>
+                                }
+                                </ul>
+                            </li>
                         }
                         </ul>
-                    </li>
-                }
-                </ul>
-                <h4>İşgal Ettiğim Gezegenler ve Filolar</h4>
-                @if (GetCurrentPlayerOccupiedPlanetsAndFleets().Count == 0)
-                {
-                    <div>Hiç işgal ettiğiniz gezegen yok.</div>
-                }
-                else
-                {
+                    }
+                    <h4>Kaynaklarım</h4>
+                    <b>Toplam:</b>
                     <ul>
-                    @foreach (var (planet, fleets) in GetCurrentPlayerOccupiedPlanetsAndFleets())
+                    @foreach (var kvp in GetPlayerTotalResources(CurrentPlayer))
                     {
-                        <li style="margin-bottom:10px;">
-                            <b>@planet.Name</b> (Savunma: @planet.DefenseCapacity)
+                        <li>@kvp.Key: @kvp.Value</li>
+                    }
+                    </ul>
+                    <b>Gezegen Bazında:</b>
+                    <ul>
+                    @foreach (var planet in GetCurrentPlayerPlanets())
+                    {
+                        <li><b>@planet.Name</b>:
                             <ul>
-                            @foreach (var fleet in fleets)
+                            @foreach (var kvp in planet.Resources)
                             {
-                                <li>@fleet.Name (Gemiler: @fleet.Ships.Count)</li>
+                                <li>@kvp.Key: @kvp.Value</li>
                             }
                             </ul>
                         </li>
                     }
                     </ul>
-                }
+                    <h4>İşgal Ettiğim Gezegenler ve Filolar</h4>
+                    @if (GetCurrentPlayerOccupiedPlanetsAndFleets().Count == 0)
+                    {
+                        <div>Hiç işgal ettiğiniz gezegen yok.</div>
+                    }
+                    else
+                    {
+                        <ul>
+                        @foreach (var (planet, fleets) in GetCurrentPlayerOccupiedPlanetsAndFleets())
+                        {
+                            <li style="margin-bottom:10px;">
+                                <b>@planet.Name</b> (Savunma: @planet.DefenseCapacity)
+                                <ul>
+                                @foreach (var fleet in fleets)
+                                {
+                                    <li>@fleet.Name (Gemiler: @fleet.Ships.Count)</li>
+                                }
+                                </ul>
+                            </li>
+                        }
+                        </ul>
+                    }
+                </div>
             </div>
         </div>
     }
@@ -688,7 +694,7 @@
         if (selectedFleetToMove == null || selectedFleetTarget == null || board == null)
             return;
         var targetCell = board.GetCell(selectedFleetTarget.Value.x, selectedFleetTarget.Value.y);
-        if (targetCell == null || targetCell.OccupiedByPlayer != null)
+        if (targetCell == null || (targetCell.OccupiedByPlayer != null && targetCell.OccupiedByPlayer != CurrentPlayer))
         {
             moveFleetMessage = "Hedef hücre dolu!";
             return;
@@ -942,7 +948,7 @@
         font-size: 1.2rem;
         margin-right: 5px;
     }
-    .emoji {
+    .space-star-emoji {
         font-size: 1.2rem;
         margin-right: 5px;
     }
