@@ -1,0 +1,218 @@
+@page "/gameboard"
+@using GalaxyWars
+@using GalaxyWars.Models
+@using GalaxyWars.Core
+@using System.Drawing
+
+@code {
+    private GalaxyWars.GameBoard? board;
+    private int width = 8;
+    private int height = 8;
+    private bool gameStarted = false;
+    private (int x, int y)? selectedCell = null;
+    private List<string> playerNames = new();
+    private string newPlayerName = string.Empty;
+    private List<Player> players = new();
+    private int currentPlayerIndex = 0;
+    private Player? CurrentPlayer => (players.Count > 0 && currentPlayerIndex >= 0 && currentPlayerIndex < players.Count) ? players[currentPlayerIndex] : null;
+    private (int x, int y)? moveFrom = null;
+    private (int x, int y)? moveTo = null;
+    private string moveMessage = string.Empty;
+    private static readonly string[] playerColors = new[] { "#2196f3", "#e53935", "#43a047", "#8e24aa", "#ffb300", "#00bcd4", "#f06292", "#6d4c41" };
+
+    private void AddPlayer()
+    {
+        if (!string.IsNullOrWhiteSpace(newPlayerName))
+        {
+            playerNames.Add(newPlayerName.Trim());
+            newPlayerName = string.Empty;
+        }
+    }
+
+    private void StartGame()
+    {
+        board = new GalaxyWars.GameBoard(width, height);
+        players.Clear();
+        var rand = new Random();
+        for (int i = 0; i < playerNames.Count; i++)
+        {
+            var name = playerNames[i];
+            int x, y;
+            do
+            {
+                x = rand.Next(width);
+                y = rand.Next(height);
+            } while (board.GetCell(x, y).OccupiedByPlayer != null);
+            var cell = board.GetCell(x, y);
+            var color = playerColors[i % playerColors.Length];
+            var player = new Player(name, color, cell);
+            cell.OccupiedByPlayer = player;
+            players.Add(player);
+        }
+        gameStarted = true;
+        selectedCell = null;
+    }
+
+    private void SelectCell(int x, int y)
+    {
+        if (!gameStarted || CurrentPlayer == null || board == null)
+            return;
+        var cell = board.GetCell(x, y);
+        if (cell == null) return;
+        if (cell.OccupiedByPlayer != null && cell.OccupiedByPlayer.Name == CurrentPlayer.Name)
+        {
+            moveFrom = (x, y);
+            moveTo = null;
+            moveMessage = $"{CurrentPlayer.Name} taşını nereye taşımak istiyorsun?";
+        }
+        else if (moveFrom != null && cell.OccupiedByPlayer == null)
+        {
+            moveTo = (x, y);
+            moveMessage = $"Taşı butonuna basarak hamleni tamamla.";
+        }
+        else
+        {
+            moveMessage = string.Empty;
+        }
+        selectedCell = (x, y);
+    }
+
+    private void MovePlayer()
+    {
+        if (moveFrom != null && moveTo != null && board != null && CurrentPlayer != null)
+        {
+            var fromCell = board.GetCell(moveFrom.Value.x, moveFrom.Value.y);
+            var toCell = board.GetCell(moveTo.Value.x, moveTo.Value.y);
+            if (fromCell != null && fromCell.OccupiedByPlayer != null && fromCell.OccupiedByPlayer.Name == CurrentPlayer.Name && toCell != null && toCell.OccupiedByPlayer == null)
+            {
+                toCell.OccupiedByPlayer = CurrentPlayer;
+                fromCell.OccupiedByPlayer = null;
+                moveMessage = $"{CurrentPlayer.Name} taşını ({moveFrom.Value.x},{moveFrom.Value.y})'den ({moveTo.Value.x},{moveTo.Value.y})'ye taşıdı.";
+                moveFrom = null;
+                moveTo = null;
+                NextPlayer();
+            }
+        }
+    }
+
+    private void NextPlayer()
+    {
+        if (players.Count > 0)
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
+    }
+}
+
+<style>
+    .game-board-table {
+        margin: 30px auto;
+        border-collapse: separate;
+        border-spacing: 6px;
+        box-shadow: 0 4px 24px 0 rgba(0,0,0,0.10);
+        background: #f8fafc;
+        border-radius: 18px;
+        padding: 12px;
+    }
+    .game-board-table td {
+        width: 44px;
+        height: 44px;
+        text-align: center;
+        vertical-align: middle;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px 0 rgba(0,0,0,0.08);
+        font-size: 1.5rem;
+        font-weight: bold;
+        transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+        cursor: pointer;
+        border: none;
+        outline: none;
+        user-select: none;
+    }
+    .game-board-table td:hover {
+        box-shadow: 0 4px 16px 0 rgba(33,150,243,0.18);
+        transform: scale(1.08);
+        z-index: 2;
+    }
+    .game-board-table .selected {
+        box-shadow: 0 0 0 3px #1976d2, 0 2px 8px 0 rgba(0,0,0,0.08);
+        background: #b3d1ff !important;
+    }
+    .game-board-table .move-from {
+        background: #ffe082 !important;
+    }
+    .game-board-table .move-to {
+        background: #b9f6ca !important;
+    }
+</style>
+
+<h3>Oyun Tahtası</h3>
+@if (!gameStarted)
+{
+    <div>
+        <label>Genişlik: <input type="number" @bind="width" min="2" max="20" /></label>
+        <label>Yükseklik: <input type="number" @bind="height" min="2" max="20" /></label>
+    </div>
+    <div style="margin-top:10px;">
+        <input placeholder="Oyuncu adı" @bind="newPlayerName" />
+        <button @onclick="AddPlayer">Oyuncu Ekle</button>
+    </div>
+    <ul>
+        @foreach (var name in playerNames)
+        {
+            <li>@name</li>
+        }
+    </ul>
+    <button @onclick="StartGame" disabled="@(playerNames.Count == 0)">Oyun Başlat</button>
+}
+else if (board != null)
+{
+    <table class="game-board-table">
+        @for (int y = 0; y < height; y++)
+        {
+            <tr>
+                @for (int x = 0; x < width; x++)
+                {
+                    var cell = board.GetCell(x, y);
+                    bool isSelected = selectedCell?.x == x && selectedCell?.y == y;
+                    bool isMoveFrom = moveFrom != null && moveFrom.Value.x == x && moveFrom.Value.y == y;
+                    bool isMoveTo = moveTo != null && moveTo.Value.x == x && moveTo.Value.y == y;
+                    var cellClass = isSelected ? "selected" : isMoveFrom ? "move-from" : isMoveTo ? "move-to" : "";
+                    <td class="@cellClass" style="background:@(cell.OccupiedByPlayer != null ? cell.OccupiedByPlayer.Color : "white"); color:@(cell.OccupiedByPlayer != null ? "white" : "#222");" @onclick="() => SelectCell(x, y)">
+                        @if (cell.OccupiedByPlayer != null)
+                        {
+                            @(cell.OccupiedByPlayer.Name.Substring(0,1).ToUpper())
+                        }
+                        else if (cell.OccupiedByPlanet != null)
+                        {
+                            @("@")
+                        }
+                    </td>
+                }
+            </tr>
+        }
+    </table>
+    @if (selectedCell != null)
+    {
+        <div style="margin-top:10px;">
+            <b>Seçili Hücre:</b> (@selectedCell?.x, @selectedCell?.y)
+        </div>
+    }
+    @if (CurrentPlayer != null)
+    {
+        <div style="margin-bottom:10px;">
+            <b>Sıra:</b> @CurrentPlayer.Name
+            <button @onclick="NextPlayer" style="margin-left:10px;">Sıradaki Oyuncuya Geç</button>
+        </div>
+        @if (!string.IsNullOrEmpty(moveMessage))
+        {
+            <div style="margin-bottom:10px; color: #0074d9;">@moveMessage</div>
+        }
+        @if (moveFrom != null && moveTo != null)
+        {
+            <button @onclick="MovePlayer" style="margin-bottom:10px;">Taşı</button>
+        }
+    }
+}
+else
+{
+    <p>Tahta yükleniyor...</p>
+}

@@ -1,9 +1,10 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GalaxyWars", "GalaxyWars.csproj", "{0E30B569-F8A3-40D1-B81E-30C8AEE69F28}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GalaxyWars.Blazor", "GalaxyWars.Blazor\GalaxyWars.Blazor.csproj", "{8FB94432-F4F0-404A-8E63-5B2AA6D938A8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GalaxyWars.Core", "GalaxyWars.Core\GalaxyWars.Core.csproj", "{4086D548-F494-4932-AECB-C4ABFBA929DE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +12,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0E30B569-F8A3-40D1-B81E-30C8AEE69F28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0E30B569-F8A3-40D1-B81E-30C8AEE69F28}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0E30B569-F8A3-40D1-B81E-30C8AEE69F28}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0E30B569-F8A3-40D1-B81E-30C8AEE69F28}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8FB94432-F4F0-404A-8E63-5B2AA6D938A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FB94432-F4F0-404A-8E63-5B2AA6D938A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8FB94432-F4F0-404A-8E63-5B2AA6D938A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8FB94432-F4F0-404A-8E63-5B2AA6D938A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4086D548-F494-4932-AECB-C4ABFBA929DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4086D548-F494-4932-AECB-C4ABFBA929DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4086D548-F494-4932-AECB-C4ABFBA929DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4086D548-F494-4932-AECB-C4ABFBA929DE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
