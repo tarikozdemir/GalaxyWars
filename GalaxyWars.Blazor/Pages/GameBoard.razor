@@ -8,8 +8,8 @@
     @if (!gameStarted)
     {
         <div>
-            <label>Genişlik: <input type="number" @bind="width" min="2" max="20" /></label>
-            <label>Yükseklik: <input type="number" @bind="height" min="2" max="20" /></label>
+            <label>Genişlik: <input type="number" @bind="width" min="@MIN_BOARD_SIZE" max="@MAX_BOARD_SIZE" /></label>
+            <label>Yükseklik: <input type="number" @bind="height" min="@MIN_BOARD_SIZE" max="@MAX_BOARD_SIZE" /></label>
         </div>
         <div style="margin-top:10px;">
             <input placeholder="Oyuncu adı" @bind="newPlayerName" />
@@ -200,8 +200,14 @@
 
 @code {
     private GalaxyWars.GameBoard? board;
-    private int width = 8;
-    private int height = 8;
+    // Sabitler
+    private const int DEFAULT_WIDTH = 8;
+    private const int DEFAULT_HEIGHT = 8;
+    private const int MIN_BOARD_SIZE = 2;
+    private const int MAX_BOARD_SIZE = 20;
+    
+    private int width = DEFAULT_WIDTH;
+    private int height = DEFAULT_HEIGHT;
     private bool gameStarted = false;
     private (int x, int y)? selectedCell = null;
     private List<string> playerNames = new();
@@ -216,7 +222,7 @@
     private bool showBuyShipPanel = false;
     private SpaceShip? selectedShipToBuy;
     private string buyShipMessage = string.Empty;
-    private List<SpaceShip> availableShips = new()
+    private static readonly List<SpaceShip> availableShips = new()
     {
         new SpaceShip("Swift Scout", SpaceShipType.Scout, 600, 80, 30, 50, 30, 200),
         new SpaceShip("Eagle Eye", SpaceShipType.Scout, 620, 90, 35, 60, 35, 220),
@@ -264,6 +270,15 @@
     private Action? onAttackConfirm;
     private Action? onAttackCancel;
     private List<GalaxyWars.Models.Planet> planets = new();
+
+    // Yardımcı metodlar
+    private bool IsValidBoard() => board != null;
+    private bool IsValidCurrentPlayer() => CurrentPlayer != null;
+    private bool IsValidGameState() => IsValidBoard() && IsValidCurrentPlayer();
+    
+    private Cell? GetCellSafely(int x, int y) => board?.GetCell(x, y);
+    private bool HasPlanet(Cell? cell) => cell?.OccupiedByPlanet != null;
+    private bool IsPlanetOwnedByCurrentPlayer(Cell? cell) => HasPlanet(cell) && cell!.OccupiedByPlanet?.OccupiedBy == CurrentPlayer;
 
     private void AddPlayer()
     {
@@ -629,13 +644,14 @@
     private List<GalaxyWars.Models.Planet> GetCurrentPlayerPlanets()
     {
         var result = new List<GalaxyWars.Models.Planet>();
-        if (board == null || CurrentPlayer == null) return result;
+        if (!IsValidGameState()) return result;
+        
         for (int y = 0; y < height; y++)
             for (int x = 0; x < width; x++)
             {
-                var cell = board!.GetCell(x, y);
-                if (cell?.OccupiedByPlanet != null && cell.OccupiedByPlanet.OccupiedBy == CurrentPlayer)
-                    result.Add(cell.OccupiedByPlanet);
+                var cell = GetCellSafely(x, y);
+                if (IsPlanetOwnedByCurrentPlayer(cell))
+                    result.Add(cell!.OccupiedByPlanet!);
             }
         return result.Distinct().ToList();
     }
