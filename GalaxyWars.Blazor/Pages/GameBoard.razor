@@ -1,5 +1,4 @@
 @page "/gameboard"
-@using GalaxyWars
 @using GalaxyWars.Models
 @using GalaxyWars.Core
 @using System.Drawing
@@ -35,7 +34,7 @@
                             @for (int x = 0; x < width; x++)
                             {
                                 var cell = board.GetCell(x, y);
-                                bool isSelected = selectedCell?.x == x && selectedCell?.y == y;
+                                bool isSelected = selectedCell != null && selectedCell.Value.x == x && selectedCell.Value.y == y;
                                 bool isMoveFrom = moveFrom != null && moveFrom.Value.x == x && moveFrom.Value.y == y;
                                 bool isMoveTo = moveTo != null && moveTo.Value.x == x && moveTo.Value.y == y;
                                 var cellClass = isSelected ? "selected" : isMoveFrom ? "move-from" : isMoveTo ? "move-to" : "";
@@ -47,7 +46,7 @@
                 @if (selectedCell != null)
                 {
                     <div style="margin-top:10px;">
-                        <b>Seçili Hücre:</b> (@selectedCell?.x, @selectedCell?.y)
+                        <b>Seçili Hücre:</b> (@selectedCell.Value.x, @selectedCell.Value.y)
                     </div>
                 }
                 <div style="margin-bottom:10px;">
@@ -142,9 +141,12 @@
                         <h4 class="panel-title">Kaynaklarım</h4>
                         <b>Toplam:</b>
                         <ul>
-                        @foreach (var kvp in GetPlayerTotalResources(CurrentPlayer))
+                        @if (CurrentPlayer != null)
                         {
-                            <li>@kvp.Key: @kvp.Value</li>
+                            @foreach (var kvp in GetPlayerTotalResources(CurrentPlayer))
+                            {
+                                <li>@kvp.Key: @kvp.Value</li>
+                            }
                         }
                         </ul>
                         <b>Gezegen Bazında:</b>
@@ -176,7 +178,7 @@
             <div class="game-side-column">
                 <SideInfoPanel
                     CurrentPlayer="CurrentPlayer"
-                    PlayerTotalResources="GetPlayerTotalResources(CurrentPlayer)"
+                    PlayerTotalResources="CurrentPlayer != null ? GetPlayerTotalResources(CurrentPlayer) : new Dictionary<string, int>()"
                     CurrentPlayerPlanets="GetCurrentPlayerPlanets()"
                     CurrentPlayerOccupiedPlanetsAndFleets="GetCurrentPlayerOccupiedPlanetsAndFleets()" />
             </div>
@@ -188,7 +190,7 @@
     }
 </div>
 
-@if (showAttackPrompt)
+@if (showAttackPrompt && onAttackConfirm != null && onAttackCancel != null)
 {
     <AttackPrompt
         AttackPromptMessage="@attackPromptMessage"
@@ -212,7 +214,7 @@
     private string moveMessage = string.Empty;
     private static readonly string[] playerColors = new[] { "#2196f3", "#e53935", "#43a047", "#8e24aa", "#ffb300", "#00bcd4", "#f06292", "#6d4c41" };
     private bool showBuyShipPanel = false;
-    private SpaceShip? selectedShipToBuy = null;
+    private SpaceShip? selectedShipToBuy;
     private string buyShipMessage = string.Empty;
     private List<SpaceShip> availableShips = new()
     {
@@ -244,23 +246,23 @@
     private HashSet<GalaxyWars.SpaceShip> selectedShipsForFleet = new();
     private string createFleetMessage = string.Empty;
     private bool showMoveFleetPanel = false;
-    private GalaxyWars.Models.Fleet? selectedFleetToMove = null;
+    private GalaxyWars.Models.Fleet? selectedFleetToMove;
     private (int x, int y)? selectedFleetTarget = null;
     private string moveFleetMessage = string.Empty;
     private bool showAttackPanel = false;
-    private GalaxyWars.Models.Fleet? selectedFleetToAttack = null;
+    private GalaxyWars.Models.Fleet? selectedFleetToAttack;
     private (int x, int y)? selectedAttackTarget = null;
     private string attackMessage = string.Empty;
     private bool showUpgradeDefensePanel = false;
-    private GalaxyWars.Models.Planet? selectedPlanetToUpgrade = null;
+    private GalaxyWars.Models.Planet? selectedPlanetToUpgrade;
     private int defenseUpgradeAmount = 0;
     private string upgradeDefenseMessage = string.Empty;
     private bool showAllOccupiedPlanetsPanel = false;
     private bool showResourcesPanel = false;
     private bool showAttackPrompt = false;
     private string attackPromptMessage = string.Empty;
-    private Action? onAttackConfirm = null;
-    private Action? onAttackCancel = null;
+    private Action? onAttackConfirm;
+    private Action? onAttackCancel;
     private List<GalaxyWars.Models.Planet> planets = new();
 
     private void AddPlayer()
@@ -285,11 +287,11 @@
             {
                 x = rand.Next(width);
                 y = rand.Next(height);
-            } while (board.GetCell(x, y).OccupiedByPlayer != null);
-            var cell = board.GetCell(x, y);
+            } while (board!.GetCell(x, y)!.OccupiedByPlayer != null);
+            var cell = board!.GetCell(x, y);
             var color = playerColors[i % playerColors.Length];
-            var player = new Player(name, color, cell);
-            cell.OccupiedByPlayer = player;
+            var player = new Player(name, color, cell!);
+            cell!.OccupiedByPlayer = player;
             players.Add(player);
         }
 
@@ -362,7 +364,7 @@
         if (board == null) return false;
         for (int y = 0; y < height; y++)
             for (int x = 0; x < width; x++)
-                if (board.GetCell(x, y).OccupiedByPlayer == player)
+                if (board!.GetCell(x, y)?.OccupiedByPlayer == player)
                     return true;
         return false;
     }
@@ -450,7 +452,7 @@
             createFleetMessage = "En az bir gemi seçmelisiniz.";
             return;
         }
-        var newFleet = new GalaxyWars.Models.Fleet(newFleetName, CurrentPlayer.HomeBase.Position, CurrentPlayer, null);
+        var newFleet = new GalaxyWars.Models.Fleet(newFleetName, CurrentPlayer!.HomeBase.Position, CurrentPlayer, null!);
         foreach (var ship in selectedShipsForFleet)
             newFleet.AddShip(ship);
         CurrentPlayer.Fleets.Add(newFleet);
@@ -529,7 +531,7 @@
         if (selectedFleetToMove == null || CurrentPlayer == null)
             return;
         // Hedef gezegende savunma filosu var mı?
-        var defendingFleets = targetCell.OccupiedByPlanet.OccupiedBy?.Fleets?.Where(f => f.CurrentLocation.X == targetCell.Position.X && f.CurrentLocation.Y == targetCell.Position.Y).ToList();
+        var defendingFleets = targetCell!.OccupiedByPlanet.OccupiedBy?.Fleets?.Where(f => f.CurrentLocation.X == targetCell.Position.X && f.CurrentLocation.Y == targetCell.Position.Y).ToList();
         int attackerPower = selectedFleetToMove.Ships.Sum(s => s.FirePower);
         int defenderPower = defendingFleets != null && defendingFleets.Count > 0 ? defendingFleets.Sum(f => f.Ships.Sum(s => s.FirePower)) : 0;
         if (attackerPower > defenderPower)
@@ -631,7 +633,7 @@
         for (int y = 0; y < height; y++)
             for (int x = 0; x < width; x++)
             {
-                var cell = board.GetCell(x, y);
+                var cell = board!.GetCell(x, y);
                 if (cell.OccupiedByPlanet != null && cell.OccupiedByPlanet.OccupiedBy == CurrentPlayer)
                     result.Add(cell.OccupiedByPlanet);
             }
