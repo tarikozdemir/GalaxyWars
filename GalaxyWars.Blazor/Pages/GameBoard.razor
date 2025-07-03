@@ -531,7 +531,7 @@
         if (selectedFleetToMove == null || CurrentPlayer == null)
             return;
         // Hedef gezegende savunma filosu var mı?
-        var defendingFleets = targetCell!.OccupiedByPlanet.OccupiedBy?.Fleets?.Where(f => f.CurrentLocation.X == targetCell.Position.X && f.CurrentLocation.Y == targetCell.Position.Y).ToList();
+        var defendingFleets = targetCell!.OccupiedByPlanet?.OccupiedBy?.Fleets?.Where(f => f.CurrentLocation.X == targetCell.Position.X && f.CurrentLocation.Y == targetCell.Position.Y).ToList();
         int attackerPower = selectedFleetToMove.Ships.Sum(s => s.FirePower);
         int defenderPower = defendingFleets != null && defendingFleets.Count > 0 ? defendingFleets.Sum(f => f.Ships.Sum(s => s.FirePower)) : 0;
         if (attackerPower > defenderPower)
@@ -540,11 +540,11 @@
             if (defendingFleets != null)
             {
                 foreach (var f in defendingFleets.ToList())
-                    targetCell.OccupiedByPlanet.OccupiedBy.Fleets.Remove(f);
+                    targetCell.OccupiedByPlanet?.OccupiedBy?.Fleets.Remove(f);
             }
             // Gezegenin sahibi ve rengi değişsin
-            targetCell.OccupiedByPlanet.OccupiedBy = CurrentPlayer;
-            targetCell.OccupiedByPlanet.Color = CurrentPlayer.Color;
+            targetCell.OccupiedByPlanet!.OccupiedBy = CurrentPlayer;
+            targetCell.OccupiedByPlanet!.Color = CurrentPlayer.Color;
             selectedFleetToMove.CurrentLocation = new System.Drawing.Point(targetCell.Position.X, targetCell.Position.Y);
             moveFleetMessage = $"Saldırı başarılı! {selectedFleetToMove.Name} filosu gezegeni ele geçirdi.";
         }
@@ -634,7 +634,7 @@
             for (int x = 0; x < width; x++)
             {
                 var cell = board!.GetCell(x, y);
-                if (cell.OccupiedByPlanet != null && cell.OccupiedByPlanet.OccupiedBy == CurrentPlayer)
+                if (cell?.OccupiedByPlanet != null && cell.OccupiedByPlanet.OccupiedBy == CurrentPlayer)
                     result.Add(cell.OccupiedByPlanet);
             }
         return result.Distinct().ToList();
@@ -670,7 +670,7 @@
             for (int x = 0; x < width; x++)
             {
                 var cell = board.GetCell(x, y);
-                if (cell.OccupiedByPlanet != null && cell.OccupiedByPlanet.OccupiedBy != null)
+                if (cell?.OccupiedByPlanet != null && cell.OccupiedByPlanet.OccupiedBy != null)
                 {
                     result.Add((cell.OccupiedByPlanet, cell.OccupiedByPlanet.OccupiedBy));
                 }
@@ -706,7 +706,7 @@
             for (int x = 0; x < width; x++)
             {
                 var cell = board.GetCell(x, y);
-                if (cell.OccupiedByPlanet != null)
+                if (cell?.OccupiedByPlanet != null)
                     cell.OccupiedByPlanet.ProduceResources();
             }
     }
@@ -718,7 +718,7 @@
             for (int x = 0; x < width; x++)
             {
                 var cell = board.GetCell(x, y);
-                if (cell.OccupiedByPlanet != null && cell.OccupiedByPlanet.OccupiedBy == CurrentPlayer)
+                if (cell?.OccupiedByPlanet != null && cell.OccupiedByPlanet.OccupiedBy == CurrentPlayer)
                 {
                     var fleets = CurrentPlayer.Fleets.Where(f => f.CurrentLocation.X == x && f.CurrentLocation.Y == y).ToList();
                     result.Add((cell.OccupiedByPlanet, fleets));
