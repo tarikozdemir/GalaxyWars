@@ -1,0 +1,76 @@
+@using GalaxyWars.Models
+<div class="side-info-panel">
+    <h4>Filolarım</h4>
+    @if (CurrentPlayer?.Fleets.Count == 0)
+    {
+        <div>Hiç filonuz yok.</div>
+    }
+    else if (CurrentPlayer != null)
+    {
+        <ul>
+        @foreach (var fleet in CurrentPlayer.Fleets)
+        {
+            <li style="margin-bottom:8px;">
+                <b>@fleet.Name</b> (Konum: @fleet.CurrentLocation.X,@fleet.CurrentLocation.Y)
+                <ul>
+                @foreach (var ship in fleet.Ships)
+                {
+                    <li>@ship.Name - Tip: @ship.Type, Güç: @ship.FirePower, Kalkan: @ship.ShieldStrength</li>
+                }
+                </ul>
+            </li>
+        }
+        </ul>
+    }
+    <h4>Kaynaklarım</h4>
+    <b>Toplam:</b>
+    <ul>
+    @foreach (var kvp in PlayerTotalResources)
+    {
+        <li>@kvp.Key: @kvp.Value</li>
+    }
+    </ul>
+    <b>Gezegen Bazında:</b>
+    <ul>
+    @foreach (var planet in CurrentPlayerPlanets)
+    {
+        <li><b>@planet.Name</b>:
+            <ul>
+            @foreach (var kvp in planet.Resources)
+            {
+                <li>@kvp.Key: @kvp.Value</li>
+            }
+            </ul>
+        </li>
+    }
+    </ul>
+    <h4>İşgal Ettiğim Gezegenler ve Filolar</h4>
+    @if (CurrentPlayerOccupiedPlanetsAndFleets.Count == 0)
+    {
+        <div>Hiç işgal ettiğiniz gezegen yok.</div>
+    }
+    else
+    {
+        <ul>
+        @foreach (var (planet, fleets) in CurrentPlayerOccupiedPlanetsAndFleets)
+        {
+            <li style="margin-bottom:10px;">
+                <b>@planet.Name</b> (Savunma: @planet.DefenseCapacity)
+                <ul>
+                @foreach (var fleet in fleets)
+                {
+                    <li>@fleet.Name (Gemiler: @fleet.Ships.Count)</li>
+                }
+                </ul>
+            </li>
+        }
+        </ul>
+    }
+</div>
+
+@code {
+    [Parameter] public Player? CurrentPlayer { get; set; }
+    [Parameter] public Dictionary<string, int> PlayerTotalResources { get; set; } = new();
+    [Parameter] public List<Planet> CurrentPlayerPlanets { get; set; } = new();
+    [Parameter] public List<(Planet planet, List<Fleet> fleets)> CurrentPlayerOccupiedPlanetsAndFleets { get; set; } = new();
+} 

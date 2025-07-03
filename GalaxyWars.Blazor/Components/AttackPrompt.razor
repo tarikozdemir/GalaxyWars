@@ -1,0 +1,14 @@
+<div class="glass-panel" style="z-index:1000; position:fixed; top:30%; left:50%; transform:translate(-50%,-50%); min-width:320px;">
+    <h4>Saldırı Onayı</h4>
+    <div>@AttackPromptMessage</div>
+    <div style="margin-top:16px; display:flex; gap:12px;">
+        <button class="btn neon-btn" @onclick="OnAttackConfirm">Saldır</button>
+        <button class="btn" @onclick="OnAttackCancel">Vazgeç</button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string AttackPromptMessage { get; set; } = string.Empty;
+    [Parameter] public EventCallback OnAttackConfirm { get; set; }
+    [Parameter] public EventCallback OnAttackCancel { get; set; }
+} 

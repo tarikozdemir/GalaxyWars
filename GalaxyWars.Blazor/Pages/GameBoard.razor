@@ -39,20 +39,7 @@
                                 bool isMoveFrom = moveFrom != null && moveFrom.Value.x == x && moveFrom.Value.y == y;
                                 bool isMoveTo = moveTo != null && moveTo.Value.x == x && moveTo.Value.y == y;
                                 var cellClass = isSelected ? "selected" : isMoveFrom ? "move-from" : isMoveTo ? "move-to" : "";
-                                <td class="@cellClass" style="background:@(cell.OccupiedByPlayer != null ? cell.OccupiedByPlayer.Color : ""); color:@(cell.OccupiedByPlayer != null ? "white" : "#e0e6f0");" @onclick="() => SelectCell(x, y)">
-                                    @if (cell.OccupiedByPlayer != null)
-                                    {
-                                        <span class="fleet-emoji">🚀</span>
-                                    }
-                                    else if (cell.OccupiedByPlanet != null)
-                                    {
-                                        <span class="planet-emoji">🪐</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="space-star-emoji">✨</span>
-                                    }
-                                </td>
+                                <CellView Cell="cell" CellClass="cellClass" OnClick="() => SelectCell(x, y)" />
                             }
                         </tr>
                     }
@@ -67,218 +54,67 @@
                     <b>Sıra:</b> @CurrentPlayer.Name
                     <span style="margin-left:10px;">Altın: @CurrentPlayer.Gold</span>
                 </div>
-                <div class="action-buttons">
-                    <button @onclick="ShowBuyShipPanel">Uzay Gemisi Satın Al</button>
-                    <button @onclick="ShowCreateFleetPanel">Filo Oluştur</button>
-                    <button @onclick="ShowMoveFleetPanel">Filo Taşı</button>
-                    <button @onclick="ShowAttackPanel">Saldırı</button>
-                    <button @onclick="ShowUpgradeDefensePanel">Gezegen Savunmasını Yükselt</button>
-                    <button @onclick="ShowFleetsPanel">Filolarımı Görüntüle</button>
-                    <button @onclick="ShowAllOccupiedPlanetsPanel">Tüm İşgal Edilmiş Gezegenler</button>
-                    <button @onclick="ShowResourcesPanel">Kaynaklarım</button>
-                    <button @onclick="NextPlayer">Sıradaki Oyuncuya Geç</button>
-                </div>
-                @if (showBuyShipPanel)
-                {
-                    <div class="glass-panel">
-                        <h4 class="panel-title">Uzay Gemisi Satın Al</h4>
-                        <table style="width:100%; font-size:0.95rem;">
-                            <tr><th>İsim</th><th>Tip</th><th>Hız</th><th>Güç</th><th>Kalkan</th><th>Fiyat</th><th></th></tr>
-                            @foreach (var ship in availableShips)
-                            {
-                                <tr style="background:@(selectedShipToBuy == ship ? "#e3f2fd" : "transparent");">
-                                    <td>@ship.Name</td>
-                                    <td>@ship.Type</td>
-                                    <td>@ship.MaxSpeed</td>
-                                    <td>@ship.FirePower</td>
-                                    <td>@ship.ShieldStrength</td>
-                                    <td>@ship.Cost</td>
-                                    <td><button @onclick="() => SelectShipToBuy(ship)">Seç</button></td>
-                                </tr>
-                            }
-                        </table>
-                        @if (selectedShipToBuy != null)
-                        {
-                            <div style="margin-top:10px;">
-                                <button @onclick="BuySelectedShip">Satın Al</button>
-                            </div>
-                        }
-                        <div style="margin-top:10px; color:#d32f2f;">@buyShipMessage</div>
-                        <button @onclick="HideBuyShipPanel" style="margin-top:10px;">Kapat</button>
-                    </div>
-                }
+                <ActionButtons
+                    DisableCreateFleet="@(CurrentPlayer == null || !CurrentPlayer.SpaceShips.Any(ship => !CurrentPlayer.Fleets.SelectMany(f => f.Ships).Contains(ship)))"
+                    DisableMoveFleet="@(CurrentPlayer == null || CurrentPlayer.Fleets.Count == 0)"
+                    ShowBuyShipPanel="ShowBuyShipPanel"
+                    ShowCreateFleetPanel="ShowCreateFleetPanel"
+                    ShowMoveFleetPanel="ShowMoveFleetPanel"
+                    ShowAttackPanel="ShowAttackPanel"
+                    ShowUpgradeDefensePanel="ShowUpgradeDefensePanel"
+                    ShowAllOccupiedPlanetsPanel="ShowAllOccupiedPlanetsPanel"
+                    ShowResourcesPanel="ShowResourcesPanel"
+                    NextPlayer="NextPlayer" />
                 @if (showCreateFleetPanel)
                 {
-                    <div class="glass-panel">
-                        <h4 class="panel-title">Filo Oluştur</h4>
-                        <input placeholder="Filo ismi" @bind="newFleetName" style="margin-bottom:10px;" />
-                        <table style="width:100%; font-size:0.95rem;">
-                            <tr><th>Seç</th><th>İsim</th><th>Tip</th><th>Hız</th><th>Güç</th><th>Kalkan</th></tr>
-                            @foreach (var ship in shipsForFleet)
-                            {
-                                <tr>
-                                    <td><input type="checkbox" checked="@selectedShipsForFleet.Contains(ship)" @onchange="_ => ToggleShipForFleet(ship)" /></td>
-                                    <td>@ship.Name</td>
-                                    <td>@ship.Type</td>
-                                    <td>@ship.MaxSpeed</td>
-                                    <td>@ship.FirePower</td>
-                                    <td>@ship.ShieldStrength</td>
-                                </tr>
-                            }
-                        </table>
-                        <button @onclick="CreateFleet" style="margin-top:10px;">Filo Oluştur</button>
-                        <div style="margin-top:10px; color:#d32f2f;">@createFleetMessage</div>
-                        <button @onclick="HideCreateFleetPanel" style="margin-top:10px;">Kapat</button>
-                    </div>
+                    <FleetPanel
+                        PanelType="create"
+                        PanelTitle="Filo Oluştur"
+                        PanelMessage="@createFleetMessage"
+                        Fleets="CurrentPlayer?.Fleets ?? new()"
+                        ShipsForFleet="shipsForFleet"
+                        SelectedShipsForFleet="selectedShipsForFleet"
+                        NewFleetName="@newFleetName"
+                        ToggleShipForFleet="ToggleShipForFleet"
+                        CreateFleet="CreateFleet"
+                        HidePanel="HideCreateFleetPanel" />
                 }
                 @if (showMoveFleetPanel)
                 {
-                    <div class="glass-panel">
-                        <h4 class="panel-title">Filo Taşı</h4>
-                        <div>
-                            <b>Filolar:</b>
-                            <ul>
-                            @foreach (var fleet in CurrentPlayer.Fleets)
-                            {
-                                <li>
-                                    <button @onclick="() => SelectFleetToMove(fleet)" style="margin-right:10px;">Seç</button>
-                                    <span class="fleet-emoji">🚀</span>@fleet.Name (Konum: @fleet.CurrentLocation.X,@fleet.CurrentLocation.Y)
-                                </li>
-                            }
-                            </ul>
-                        </div>
-                        @if (selectedFleetToMove != null)
-                        {
-                            <div style="margin-top:10px;">
-                                <b>Hedef Hücreyi Seç:</b>
-                                <div style="margin-top:5px;">Tahta üstünde bir hücreye tıkla.</div>
-                            </div>
-                        }
-                        @if (selectedFleetToMove != null && selectedFleetTarget != null)
-                        {
-                            <div style="margin-top:10px;">
-                                <button @onclick="MoveSelectedFleet">Taşı</button>
-                            </div>
-                        }
-                        <div style="margin-top:10px; color:#d32f2f;">@moveFleetMessage</div>
-                        <button @onclick="HideMoveFleetPanel" style="margin-top:10px;">Kapat</button>
-                    </div>
+                    <FleetPanel
+                        PanelType="move"
+                        PanelTitle="Filo Taşı"
+                        PanelMessage="@moveFleetMessage"
+                        Fleets="CurrentPlayer?.Fleets ?? new()"
+                        SelectedFleetToMove="selectedFleetToMove"
+                        SelectedFleetTarget="selectedFleetTarget"
+                        SelectFleetToMove="SelectFleetToMove"
+                        MoveSelectedFleet="MoveSelectedFleet"
+                        HidePanel="HideMoveFleetPanel" />
                 }
                 @if (showAttackPanel)
                 {
-                    <div class="glass-panel">
-                        <h4 class="panel-title">Saldırı</h4>
-                        <div>
-                            <b>Filolar:</b>
-                            <ul>
-                            @foreach (var fleet in CurrentPlayer.Fleets)
-                            {
-                                <li>
-                                    <button @onclick="() => SelectFleetToAttack(fleet)" style="margin-right:10px;">Seç</button>
-                                    <span class="fleet-emoji">🚀</span>@fleet.Name (Konum: @fleet.CurrentLocation.X,@fleet.CurrentLocation.Y)
-                                </li>
-                            }
-                            </ul>
-                        </div>
-                        @if (selectedFleetToAttack != null)
-                        {
-                            <div style="margin-top:10px;">
-                                <b>Hedef Hücreyi Seç:</b>
-                                <div style="margin-top:5px;">Tahta üstünde bir hücreye tıkla.</div>
-                            </div>
-                        }
-                        @if (selectedFleetToAttack != null && selectedAttackTarget != null)
-                        {
-                            <div style="margin-top:10px;">
-                                <button @onclick="AttackWithSelectedFleet">Saldır</button>
-                            </div>
-                        }
-                        <div style="margin-top:10px; color:#d32f2f;">@attackMessage</div>
-                        <button @onclick="HideAttackPanel" style="margin-top:10px;">Kapat</button>
-                    </div>
+                    <FleetPanel
+                        PanelType="attack"
+                        PanelTitle="Saldırı"
+                        PanelMessage="@attackMessage"
+                        Fleets="CurrentPlayer?.Fleets ?? new()"
+                        SelectedFleetToAttack="selectedFleetToAttack"
+                        SelectedAttackTarget="selectedAttackTarget"
+                        SelectFleetToAttack="SelectFleetToAttack"
+                        AttackWithSelectedFleet="AttackWithSelectedFleet"
+                        HidePanel="HideAttackPanel" />
                 }
                 @if (showUpgradeDefensePanel)
                 {
-                    <div class="glass-panel">
-                        <h4 class="panel-title">Gezegen Savunmasını Yükselt</h4>
-                        <div>
-                            <b>Gezegenler:</b>
-                            <ul>
-                            @foreach (var planet in GetCurrentPlayerPlanets())
-                            {
-                                <li>
-                                    <button @onclick="() => selectedPlanetToUpgrade = planet" style="margin-right:10px;">Seç</button>
-                                    <span class="planet-emoji">🪐</span>@planet.Name (Savunma: @planet.DefenseCapacity)
-                                </li>
-                            }
-                            </ul>
-                        </div>
-                        @if (selectedPlanetToUpgrade != null)
-                        {
-                            <div style="margin-top:10px;">
-                                <input type="number" min="1" @bind="defenseUpgradeAmount" placeholder="Artış miktarı" />
-                                <button @onclick="UpgradeSelectedPlanetDefense" style="margin-left:10px;">Yükselt</button>
-                            </div>
-                        }
-                        <div style="margin-top:10px; color:#d32f2f;">@upgradeDefenseMessage</div>
-                        <button @onclick="HideUpgradeDefensePanel" style="margin-top:10px;">Kapat</button>
-                    </div>
-                }
-                @if (showFleetsPanel)
-                {
-                    <div class="glass-panel">
-                        <h4 class="panel-title">Filolarım</h4>
-                        @if (CurrentPlayer.Fleets.Count == 0)
-                        {
-                            <div>Hiç filonuz yok.</div>
-                        }
-                        else
-                        {
-                            <ul>
-                            @foreach (var fleet in CurrentPlayer.Fleets)
-                            {
-                                <li style="margin-bottom:10px;">
-                                    <b>@fleet.Name</b> (Konum: @fleet.CurrentLocation.X,@fleet.CurrentLocation.Y)
-                                    <ul>
-                                    @foreach (var ship in fleet.Ships)
-                                    {
-                                        <li>@ship.Name - Tip: @ship.Type, Güç: @ship.FirePower, Kalkan: @ship.ShieldStrength</li>
-                                    }
-                                    </ul>
-                                </li>
-                            }
-                            </ul>
-                        }
-                        <button @onclick="HideFleetsPanel" style="margin-top:10px;">Kapat</button>
-                    </div>
-                }
-                @if (showOccupiedPlanetsPanel)
-                {
-                    <div class="glass-panel">
-                        <h4 class="panel-title">İşgal Ettiğim Gezegenler ve Filolar</h4>
-                        @if (GetCurrentPlayerOccupiedPlanetsAndFleets().Count == 0)
-                        {
-                            <div>Hiç işgal ettiğiniz gezegen yok.</div>
-                        }
-                        else
-                        {
-                            <ul>
-                            @foreach (var (planet, fleets) in GetCurrentPlayerOccupiedPlanetsAndFleets())
-                            {
-                                <li style="margin-bottom:10px;">
-                                    <b>@planet.Name</b> (Savunma: @planet.DefenseCapacity)
-                                    <ul>
-                                    @foreach (var fleet in fleets)
-                                    {
-                                        <li>@fleet.Name (Gemiler: @fleet.Ships.Count)</li>
-                                    }
-                                    </ul>
-                                </li>
-                            }
-                            </ul>
-                        }
-                        <button @onclick="HideOccupiedPlanetsPanel" style="margin-top:10px;">Kapat</button>
-                    </div>
+                    <PlanetPanel
+                        CurrentPlayerPlanets="GetCurrentPlayerPlanets()"
+                        SelectedPlanetToUpgrade="selectedPlanetToUpgrade"
+                        DefenseUpgradeAmount="defenseUpgradeAmount"
+                        UpgradeDefenseMessage="upgradeDefenseMessage"
+                        SelectPlanetToUpgrade="(planet) => { selectedPlanetToUpgrade = planet; }"
+                        UpgradeSelectedPlanetDefense="UpgradeSelectedPlanetDefense"
+                        HidePanel="HideUpgradeDefensePanel" />
                 }
                 @if (showAllOccupiedPlanetsPanel)
                 {
@@ -338,74 +174,11 @@
                 }
             </div>
             <div class="game-side-column">
-                <div class="side-info-panel">
-                    <h4>Filolarım</h4>
-                    @if (CurrentPlayer.Fleets.Count == 0)
-                    {
-                        <div>Hiç filonuz yok.</div>
-                    }
-                    else
-                    {
-                        <ul>
-                        @foreach (var fleet in CurrentPlayer.Fleets)
-                        {
-                            <li style="margin-bottom:8px;">
-                                <b>@fleet.Name</b> (Konum: @fleet.CurrentLocation.X,@fleet.CurrentLocation.Y)
-                                <ul>
-                                @foreach (var ship in fleet.Ships)
-                                {
-                                    <li>@ship.Name - Tip: @ship.Type, Güç: @ship.FirePower, Kalkan: @ship.ShieldStrength</li>
-                                }
-                                </ul>
-                            </li>
-                        }
-                        </ul>
-                    }
-                    <h4>Kaynaklarım</h4>
-                    <b>Toplam:</b>
-                    <ul>
-                    @foreach (var kvp in GetPlayerTotalResources(CurrentPlayer))
-                    {
-                        <li>@kvp.Key: @kvp.Value</li>
-                    }
-                    </ul>
-                    <b>Gezegen Bazında:</b>
-                    <ul>
-                    @foreach (var planet in GetCurrentPlayerPlanets())
-                    {
-                        <li><b>@planet.Name</b>:
-                            <ul>
-                            @foreach (var kvp in planet.Resources)
-                            {
-                                <li>@kvp.Key: @kvp.Value</li>
-                            }
-                            </ul>
-                        </li>
-                    }
-                    </ul>
-                    <h4>İşgal Ettiğim Gezegenler ve Filolar</h4>
-                    @if (GetCurrentPlayerOccupiedPlanetsAndFleets().Count == 0)
-                    {
-                        <div>Hiç işgal ettiğiniz gezegen yok.</div>
-                    }
-                    else
-                    {
-                        <ul>
-                        @foreach (var (planet, fleets) in GetCurrentPlayerOccupiedPlanetsAndFleets())
-                        {
-                            <li style="margin-bottom:10px;">
-                                <b>@planet.Name</b> (Savunma: @planet.DefenseCapacity)
-                                <ul>
-                                @foreach (var fleet in fleets)
-                                {
-                                    <li>@fleet.Name (Gemiler: @fleet.Ships.Count)</li>
-                                }
-                                </ul>
-                            </li>
-                        }
-                        </ul>
-                    }
-                </div>
+                <SideInfoPanel
+                    CurrentPlayer="CurrentPlayer"
+                    PlayerTotalResources="GetPlayerTotalResources(CurrentPlayer)"
+                    CurrentPlayerPlanets="GetCurrentPlayerPlanets()"
+                    CurrentPlayerOccupiedPlanetsAndFleets="GetCurrentPlayerOccupiedPlanetsAndFleets()" />
             </div>
         </div>
     }
@@ -414,6 +187,14 @@
         <p>Tahta yükleniyor...</p>
     }
 </div>
+
+@if (showAttackPrompt)
+{
+    <AttackPrompt
+        AttackPromptMessage="@attackPromptMessage"
+        OnAttackConfirm="onAttackConfirm"
+        OnAttackCancel="onAttackCancel" />
+}
 
 @code {
     private GalaxyWars.GameBoard? board;
@@ -474,10 +255,13 @@
     private GalaxyWars.Models.Planet? selectedPlanetToUpgrade = null;
     private int defenseUpgradeAmount = 0;
     private string upgradeDefenseMessage = string.Empty;
-    private bool showFleetsPanel = false;
-    private bool showOccupiedPlanetsPanel = false;
     private bool showAllOccupiedPlanetsPanel = false;
     private bool showResourcesPanel = false;
+    private bool showAttackPrompt = false;
+    private string attackPromptMessage = string.Empty;
+    private Action? onAttackConfirm = null;
+    private Action? onAttackCancel = null;
+    private List<GalaxyWars.Models.Planet> planets = new();
 
     private void AddPlayer()
     {
@@ -508,6 +292,12 @@
             cell.OccupiedByPlayer = player;
             players.Add(player);
         }
+
+        // --- GEZEGENLERİ OLUŞTUR ---
+        planets.Clear();
+        var planetSetup = new GalaxyWars.Setup.PlanetSetup(board.GetGameBoard(), planets);
+        planetSetup.SetupPlanets();
+
         gameStarted = true;
         selectedCell = null;
     }
@@ -521,20 +311,23 @@
         }
         if (showMoveFleetPanel && selectedFleetToMove != null)
         {
+            var cell = board?.GetCell(x, y);
+            if (cell == null || cell.OccupiedByPlanet == null)
+                return; // Sadece gezegen olan hücreler seçilebilir
             SelectFleetTarget(x, y);
             return;
         }
         if (!gameStarted || CurrentPlayer == null || board == null)
             return;
-        var cell = board.GetCell(x, y);
-        if (cell == null) return;
-        if (cell.OccupiedByPlayer != null && cell.OccupiedByPlayer.Name == CurrentPlayer.Name)
+        var normalCell = board.GetCell(x, y);
+        if (normalCell == null) return;
+        if (normalCell.OccupiedByPlayer != null && normalCell.OccupiedByPlayer.Name == CurrentPlayer.Name)
         {
             moveFrom = (x, y);
             moveTo = null;
             moveMessage = $"{CurrentPlayer.Name} taşını nereye taşımak istiyorsun?";
         }
-        else if (moveFrom != null && cell.OccupiedByPlayer == null)
+        else if (moveFrom != null && normalCell.OccupiedByPlayer == null)
         {
             moveTo = (x, y);
             moveMessage = $"Taşı butonuna basarak hamleni tamamla.";
@@ -694,15 +487,75 @@
         if (selectedFleetToMove == null || selectedFleetTarget == null || board == null)
             return;
         var targetCell = board.GetCell(selectedFleetTarget.Value.x, selectedFleetTarget.Value.y);
-        if (targetCell == null || (targetCell.OccupiedByPlayer != null && targetCell.OccupiedByPlayer != CurrentPlayer))
+        if (targetCell == null)
         {
-            moveFleetMessage = "Hedef hücre dolu!";
+            moveFleetMessage = $"Hedef hücre geçersiz! (targetCell null, x={selectedFleetTarget.Value.x}, y={selectedFleetTarget.Value.y})";
             return;
         }
+        if (targetCell.OccupiedByPlanet == null)
+        {
+            moveFleetMessage = $"Filolar sadece gezegenlere taşınabilir! (OccupiedByPlanet null, x={selectedFleetTarget.Value.x}, y={selectedFleetTarget.Value.y})";
+            return;
+        }
+        // Eğer gezegenin sahibi yoksa, ilk giden oyuncu sahibi olur ve rengi atanır
+        if (targetCell.OccupiedByPlanet.OccupiedBy == null && CurrentPlayer != null)
+        {
+            targetCell.OccupiedByPlanet.OccupiedBy = CurrentPlayer;
+            targetCell.OccupiedByPlanet.Color = CurrentPlayer.Color;
+            selectedFleetToMove.CurrentLocation = new System.Drawing.Point(selectedFleetTarget.Value.x, selectedFleetTarget.Value.y);
+            moveFleetMessage = $"{selectedFleetToMove.Name} filosu ({selectedFleetTarget.Value.x},{selectedFleetTarget.Value.y}) konumuna taşındı.";
+            HideMoveFleetPanel();
+            return;
+        }
+        // Eğer gezegen başka bir oyuncuya aitse saldırı sorusu
+        if (targetCell.OccupiedByPlanet.OccupiedBy != null && targetCell.OccupiedByPlanet.OccupiedBy != CurrentPlayer)
+        {
+            showAttackPrompt = true;
+            attackPromptMessage = $"Bu gezegen {targetCell.OccupiedByPlanet.OccupiedBy.Name} adlı oyuncuya ait. Saldırmak istiyor musunuz?";
+            onAttackConfirm = () => ExecuteFleetAttack(targetCell);
+            onAttackCancel = () => { showAttackPrompt = false; moveFleetMessage = "Filo hareketi iptal edildi."; StateHasChanged(); };
+            StateHasChanged();
+            return;
+        }
+        // Eğer gezegen zaten bu oyuncuya aitse sadece taşı
         selectedFleetToMove.CurrentLocation = new System.Drawing.Point(selectedFleetTarget.Value.x, selectedFleetTarget.Value.y);
         moveFleetMessage = $"{selectedFleetToMove.Name} filosu ({selectedFleetTarget.Value.x},{selectedFleetTarget.Value.y}) konumuna taşındı.";
         HideMoveFleetPanel();
     }
+
+    private void ExecuteFleetAttack(Cell targetCell)
+    {
+        showAttackPrompt = false;
+        if (selectedFleetToMove == null || CurrentPlayer == null)
+            return;
+        // Hedef gezegende savunma filosu var mı?
+        var defendingFleets = targetCell.OccupiedByPlanet.OccupiedBy?.Fleets?.Where(f => f.CurrentLocation.X == targetCell.Position.X && f.CurrentLocation.Y == targetCell.Position.Y).ToList();
+        int attackerPower = selectedFleetToMove.Ships.Sum(s => s.FirePower);
+        int defenderPower = defendingFleets != null && defendingFleets.Count > 0 ? defendingFleets.Sum(f => f.Ships.Sum(s => s.FirePower)) : 0;
+        if (attackerPower > defenderPower)
+        {
+            // Savunan filoları yok et
+            if (defendingFleets != null)
+            {
+                foreach (var f in defendingFleets.ToList())
+                    targetCell.OccupiedByPlanet.OccupiedBy.Fleets.Remove(f);
+            }
+            // Gezegenin sahibi ve rengi değişsin
+            targetCell.OccupiedByPlanet.OccupiedBy = CurrentPlayer;
+            targetCell.OccupiedByPlanet.Color = CurrentPlayer.Color;
+            selectedFleetToMove.CurrentLocation = new System.Drawing.Point(targetCell.Position.X, targetCell.Position.Y);
+            moveFleetMessage = $"Saldırı başarılı! {selectedFleetToMove.Name} filosu gezegeni ele geçirdi.";
+        }
+        else
+        {
+            // Saldıran filo yok olur
+            CurrentPlayer.Fleets.Remove(selectedFleetToMove);
+            moveFleetMessage = "Saldırı başarısız! Saldıran filo yok edildi.";
+        }
+        HideMoveFleetPanel();
+        StateHasChanged();
+    }
+
     private void ShowAttackPanel()
     {
         showAttackPanel = true;
@@ -799,38 +652,6 @@
             upgradeDefenseMessage = "Yeterli altın yok!";
         }
     }
-    private void ShowFleetsPanel()
-    {
-        showFleetsPanel = true;
-    }
-    private void HideFleetsPanel()
-    {
-        showFleetsPanel = false;
-    }
-    private void ShowOccupiedPlanetsPanel()
-    {
-        showOccupiedPlanetsPanel = true;
-    }
-    private void HideOccupiedPlanetsPanel()
-    {
-        showOccupiedPlanetsPanel = false;
-    }
-    private List<(GalaxyWars.Models.Planet planet, List<GalaxyWars.Models.Fleet> fleets)> GetCurrentPlayerOccupiedPlanetsAndFleets()
-    {
-        var result = new List<(GalaxyWars.Models.Planet, List<GalaxyWars.Models.Fleet>)>();
-        if (board == null || CurrentPlayer == null) return result;
-        for (int y = 0; y < height; y++)
-            for (int x = 0; x < width; x++)
-            {
-                var cell = board.GetCell(x, y);
-                if (cell.OccupiedByPlanet != null && cell.OccupiedByPlanet.OccupiedBy == CurrentPlayer)
-                {
-                    var fleets = CurrentPlayer.Fleets.Where(f => f.CurrentLocation.X == x && f.CurrentLocation.Y == y).ToList();
-                    result.Add((cell.OccupiedByPlanet, fleets));
-                }
-            }
-        return result.Distinct().ToList();
-    }
     private void ShowAllOccupiedPlanetsPanel()
     {
         showAllOccupiedPlanetsPanel = true;
@@ -886,6 +707,22 @@
                 if (cell.OccupiedByPlanet != null)
                     cell.OccupiedByPlanet.ProduceResources();
             }
+    }
+    private List<(GalaxyWars.Models.Planet planet, List<GalaxyWars.Models.Fleet> fleets)> GetCurrentPlayerOccupiedPlanetsAndFleets()
+    {
+        var result = new List<(GalaxyWars.Models.Planet, List<GalaxyWars.Models.Fleet>)>();
+        if (board == null || CurrentPlayer == null) return result;
+        for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
+            {
+                var cell = board.GetCell(x, y);
+                if (cell.OccupiedByPlanet != null && cell.OccupiedByPlanet.OccupiedBy == CurrentPlayer)
+                {
+                    var fleets = CurrentPlayer.Fleets.Where(f => f.CurrentLocation.X == x && f.CurrentLocation.Y == y).ToList();
+                    result.Add((cell.OccupiedByPlanet, fleets));
+                }
+            }
+        return result.Distinct().ToList();
     }
 }
 

@@ -1,0 +1,25 @@
+@using GalaxyWars.Models
+<td class="@CellClass"
+    style="background:@(Cell.OccupiedByPlayer != null ? Cell.OccupiedByPlayer.Color : ""); color:@(Cell.OccupiedByPlayer != null ? "white" : "#e0e6f0");"
+    @onclick="OnClick">
+    @if (Cell.OccupiedByPlayer != null)
+    {
+        <span class="fleet-emoji">🚀</span>
+    }
+    else if (Cell.OccupiedByPlanet != null)
+    {
+        <span class="planet-emoji">🪐</span>
+    }
+    else
+    {
+        <svg width="10" height="10" style="display:block;margin:auto;">
+            <circle cx="5" cy="5" r="1.2" fill="#b0b8c9" />
+        </svg>
+    }
+</td>
+
+@code {
+    [Parameter] public Cell Cell { get; set; }
+    [Parameter] public string CellClass { get; set; } = string.Empty;
+    [Parameter] public EventCallback OnClick { get; set; }
+} 

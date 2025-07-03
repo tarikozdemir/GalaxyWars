@@ -1,0 +1,21 @@
+<div class="action-buttons">
+    <button @onclick="ShowBuyShipPanel">Uzay Gemisi Satın Al</button>
+    <button @onclick="ShowCreateFleetPanel" disabled="@DisableCreateFleet">Filo Oluştur</button>
+    <button @onclick="ShowMoveFleetPanel" disabled="@DisableMoveFleet">Filo Taşı</button>
+    <button @onclick="ShowAttackPanel" disabled="@DisableMoveFleet">Saldırı</button>
+    <button @onclick="ShowUpgradeDefensePanel">Gezegen Savunmasını Yükselt</button>
+    <button @onclick="ShowAllOccupiedPlanetsPanel">Tüm İşgal Edilmiş Gezegenler</button>
+    <button @onclick="NextPlayer">Sıradaki Oyuncuya Geç</button>
+</div>
+
+@code {
+    [Parameter] public bool DisableCreateFleet { get; set; }
+    [Parameter] public bool DisableMoveFleet { get; set; }
+    [Parameter] public EventCallback ShowBuyShipPanel { get; set; }
+    [Parameter] public EventCallback ShowCreateFleetPanel { get; set; }
+    [Parameter] public EventCallback ShowMoveFleetPanel { get; set; }
+    [Parameter] public EventCallback ShowAttackPanel { get; set; }
+    [Parameter] public EventCallback ShowUpgradeDefensePanel { get; set; }
+    [Parameter] public EventCallback ShowAllOccupiedPlanetsPanel { get; set; }
+    [Parameter] public EventCallback NextPlayer { get; set; }
+} 

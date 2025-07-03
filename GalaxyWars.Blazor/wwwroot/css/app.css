@@ -200,8 +200,8 @@ body, html {
 .game-board-table {
     width: 100%;
     border-collapse: separate;
-    border-spacing: 2px;
-    background: rgba(18, 20, 32, 0.98);
+    border-spacing: 0;
+    background: #1b2735;
     border-radius: 12px;
     overflow: hidden;
     margin-bottom: 1rem;

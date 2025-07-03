@@ -1,0 +1,105 @@
+<div class="glass-panel">
+    <h4 class="panel-title">@PanelTitle</h4>
+    @if (PanelType == "create")
+    {
+        <input placeholder="Filo ismi" @bind="NewFleetName" style="margin-bottom:10px;" />
+        <table style="width:100%; font-size:0.95rem;">
+            <tr><th>Seç</th><th>İsim</th><th>Tip</th><th>Hız</th><th>Güç</th><th>Kalkan</th></tr>
+            @foreach (var ship in ShipsForFleet)
+            {
+                <tr>
+                    <td><input type="checkbox" checked="@SelectedShipsForFleet.Contains(ship)" @onchange="_ => ToggleShipForFleet.InvokeAsync(ship)" /></td>
+                    <td>@ship.Name</td>
+                    <td>@ship.Type</td>
+                    <td>@ship.MaxSpeed</td>
+                    <td>@ship.FirePower</td>
+                    <td>@ship.ShieldStrength</td>
+                </tr>
+            }
+        </table>
+        <button @onclick="CreateFleet" style="margin-top:10px;">Filo Oluştur</button>
+        <div style="margin-top:10px; color:#d32f2f;">@PanelMessage</div>
+        <button @onclick="HidePanel" style="margin-top:10px;">Kapat</button>
+    }
+    else if (PanelType == "move")
+    {
+        <div>
+            <b>Filolar:</b>
+            <ul>
+            @foreach (var fleet in Fleets)
+            {
+                <li>
+                    <button @onclick="() => SelectFleetToMove.InvokeAsync(fleet)" style="margin-right:10px;">Seç</button>
+                    <span class="fleet-emoji">🚀</span>@fleet.Name (Konum: @fleet.CurrentLocation.X,@fleet.CurrentLocation.Y)
+                </li>
+            }
+            </ul>
+        </div>
+        @if (SelectedFleetToMove != null)
+        {
+            <div style="margin-top:10px;">
+                <b>Hedef Hücreyi Seç:</b>
+                <div style="margin-top:5px;">Tahta üstünde bir hücreye tıkla.</div>
+            </div>
+        }
+        @if (SelectedFleetToMove != null && SelectedFleetTarget != null)
+        {
+            <div style="margin-top:10px;">
+                <button @onclick="MoveSelectedFleet">Taşı</button>
+            </div>
+        }
+        <div style="margin-top:10px; color:#d32f2f;">@PanelMessage</div>
+        <button @onclick="HidePanel" style="margin-top:10px;">Kapat</button>
+    }
+    else if (PanelType == "attack")
+    {
+        <div>
+            <b>Filolar:</b>
+            <ul>
+            @foreach (var fleet in Fleets)
+            {
+                <li>
+                    <button @onclick="() => SelectFleetToAttack.InvokeAsync(fleet)" style="margin-right:10px;">Seç</button>
+                    <span class="fleet-emoji">🚀</span>@fleet.Name (Konum: @fleet.CurrentLocation.X,@fleet.CurrentLocation.Y)
+                </li>
+            }
+            </ul>
+        </div>
+        @if (SelectedFleetToAttack != null)
+        {
+            <div style="margin-top:10px;">
+                <b>Hedef Hücreyi Seç:</b>
+                <div style="margin-top:5px;">Tahta üstünde bir hücreye tıkla.</div>
+            </div>
+        }
+        @if (SelectedFleetToAttack != null && SelectedAttackTarget != null)
+        {
+            <div style="margin-top:10px;">
+                <button @onclick="AttackWithSelectedFleet">Saldır</button>
+            </div>
+        }
+        <div style="margin-top:10px; color:#d32f2f;">@PanelMessage</div>
+        <button @onclick="HidePanel" style="margin-top:10px;">Kapat</button>
+    }
+</div>
+
+@code {
+    [Parameter] public string PanelType { get; set; } = "create"; // "create", "move", "attack"
+    [Parameter] public string PanelTitle { get; set; } = string.Empty;
+    [Parameter] public string PanelMessage { get; set; } = string.Empty;
+    [Parameter] public List<GalaxyWars.Models.Fleet> Fleets { get; set; } = new();
+    [Parameter] public List<GalaxyWars.SpaceShip> ShipsForFleet { get; set; } = new();
+    [Parameter] public HashSet<GalaxyWars.SpaceShip> SelectedShipsForFleet { get; set; } = new();
+    [Parameter] public GalaxyWars.Models.Fleet? SelectedFleetToMove { get; set; }
+    [Parameter] public (int x, int y)? SelectedFleetTarget { get; set; }
+    [Parameter] public GalaxyWars.Models.Fleet? SelectedFleetToAttack { get; set; }
+    [Parameter] public (int x, int y)? SelectedAttackTarget { get; set; }
+    [Parameter] public string NewFleetName { get; set; } = string.Empty;
+    [Parameter] public EventCallback<GalaxyWars.SpaceShip> ToggleShipForFleet { get; set; }
+    [Parameter] public EventCallback CreateFleet { get; set; }
+    [Parameter] public EventCallback HidePanel { get; set; }
+    [Parameter] public EventCallback<GalaxyWars.Models.Fleet> SelectFleetToMove { get; set; }
+    [Parameter] public EventCallback MoveSelectedFleet { get; set; }
+    [Parameter] public EventCallback<GalaxyWars.Models.Fleet> SelectFleetToAttack { get; set; }
+    [Parameter] public EventCallback AttackWithSelectedFleet { get; set; }
+} 
